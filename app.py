@@ -350,122 +350,37 @@ if not st.session_state.user_name:
     elif _tp == 'new':
         st.session_state.join_pick = '새천년'
 
+    picked_old = st.session_state.join_pick == "세기말"
+    picked_new = st.session_state.join_pick == "새천년"
+
     col_a, col_b = st.columns(2)
     with col_a:
-        picked_old = st.session_state.join_pick == "세기말"
-        picked_new = st.session_state.join_pick == "새천년"
-        cls_old  = "selected" if picked_old else ("dimmed" if picked_new else "")
-        chk_old  = "✅ 선택됨" if picked_old else ""
-        chk_vis  = "visible" if picked_old else "hidden"
-        components.html(f"""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
-*{{box-sizing:border-box;margin:0;padding:0;}}
-body{{background:transparent;}}
-.card{{
-  background:linear-gradient(160deg,#33001a 0%,#660033 50%,#33001a 100%);
-  border-radius:24px;padding:20px 16px 18px;text-align:center;
-  cursor:pointer;width:100%;user-select:none;
-  border:4px solid #ff449944;
-  box-shadow:0 0 40px #ff449966,0 0 80px #ff449922;
-  transition:all 0.2s ease; position:relative;
-}}
-.card.selected{{
-  border:5px solid #ffffff;
-  box-shadow:0 0 0 3px #ffffff66,0 0 60px #ff4499cc,0 0 120px #ff449966;
-  filter:brightness(1.25);
-}}
-.card.dimmed{{
-  opacity:0.18;
-  filter:grayscale(0.6) brightness(0.5);
-  transform:scale(0.96);
-}}
-.card:not(.selected):not(.dimmed):hover{{filter:brightness(1.1);}}
-.card:active{{transform:scale(0.97);}}
-.sub{{color:#ff4499;font-size:0.8rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:4px;}}
-.name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);color:#ff99cc;letter-spacing:4px;
-       text-shadow:0 0 10px #ff4499cc,0 0 20px #ff449988;}}
-.ico{{font-size:2.2rem;margin:10px 0 6px;line-height:1;}}
-.bigchk{{display:none;position:absolute;inset:0;border-radius:22px;
-         background:rgba(0,0,0,0.55);align-items:center;justify-content:center;
-         flex-direction:column;}}
-.card.selected .bigchk{{display:flex;}}
-.bigchk-mark{{font-size:4rem;line-height:1;}}
-.bigchk-txt{{color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;
-             font-family:'Noto Sans KR',sans-serif;}}
-</style>
-<div class="card {cls_old}" id="c-old">
-  <div class="bigchk">
-    <div class="bigchk-mark">✅</div>
-    <div class="bigchk-txt">선택됨</div>
+        sel_old = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #ff4499cc;filter:brightness(1.25);" if picked_old else ""
+        dim_old = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_new else ""
+        chk_old = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_old else ""
+        st.markdown(f"""
+<a href="?team_pick=old" style="text-decoration:none;display:block;margin-bottom:8px;">
+  <div class="score-card card-old" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_old}{dim_old}">
+    {chk_old}
+    <div class="sub-text">99년생 + 홀수 출생</div>
+    <div class="team-name">세기말 팀</div>
+    <div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩷</div>
   </div>
-  <div class="sub">99년생 + 홀수 출생</div>
-  <div class="name">세기말 팀</div>
-  <div class="ico">🩷</div>
-</div>
-<script>
-document.getElementById('c-old').addEventListener('click', function() {{
-  (window.parent || window).location.href = '?team_pick=old';
-}});
-</script>
-""", height=200)
+</a>""", unsafe_allow_html=True)
 
     with col_b:
-        picked_old = st.session_state.join_pick == "세기말"
-        picked_new = st.session_state.join_pick == "새천년"
-        cls_new  = "selected" if picked_new else ("dimmed" if picked_old else "")
-        components.html(f"""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
-*{{box-sizing:border-box;margin:0;padding:0;}}
-body{{background:transparent;}}
-.card{{
-  background:linear-gradient(160deg,#001a33 0%,#003366 50%,#001a33 100%);
-  border-radius:24px;padding:20px 16px 18px;text-align:center;
-  cursor:pointer;width:100%;user-select:none;
-  border:4px solid #66ccff44;
-  box-shadow:0 0 40px #66ccff66,0 0 80px #66ccff22;
-  transition:all 0.2s ease; position:relative;
-}}
-.card.selected{{
-  border:5px solid #ffffff;
-  box-shadow:0 0 0 3px #ffffff66,0 0 60px #66ccffcc,0 0 120px #66ccff66;
-  filter:brightness(1.25);
-}}
-.card.dimmed{{
-  opacity:0.18;
-  filter:grayscale(0.6) brightness(0.5);
-  transform:scale(0.96);
-}}
-.card:not(.selected):not(.dimmed):hover{{filter:brightness(1.1);}}
-.card:active{{transform:scale(0.97);}}
-.sub{{color:#66ccff;font-size:0.8rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:4px;}}
-.name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);color:#aaddff;letter-spacing:4px;
-       text-shadow:0 0 10px #66ccffcc,0 0 20px #66ccff88;}}
-.ico{{font-size:2.2rem;margin:10px 0 6px;line-height:1;}}
-.bigchk{{display:none;position:absolute;inset:0;border-radius:22px;
-         background:rgba(0,0,0,0.55);align-items:center;justify-content:center;
-         flex-direction:column;}}
-.card.selected .bigchk{{display:flex;}}
-.bigchk-mark{{font-size:4rem;line-height:1;}}
-.bigchk-txt{{color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;
-             font-family:'Noto Sans KR',sans-serif;}}
-</style>
-<div class="card {cls_new}" id="c-new">
-  <div class="bigchk">
-    <div class="bigchk-mark">✅</div>
-    <div class="bigchk-txt">선택됨</div>
+        sel_new = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #66ccffcc;filter:brightness(1.25);" if picked_new else ""
+        dim_new = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_old else ""
+        chk_new = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_new else ""
+        st.markdown(f"""
+<a href="?team_pick=new" style="text-decoration:none;display:block;margin-bottom:8px;">
+  <div class="score-card card-new" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_new}{dim_new}">
+    {chk_new}
+    <div class="sub-text">00년생 + 짝수 출생</div>
+    <div class="team-name">새천년 팀</div>
+    <div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩵</div>
   </div>
-  <div class="sub">00년생 + 짝수 출생</div>
-  <div class="name">새천년 팀</div>
-  <div class="ico">🩵</div>
-</div>
-<script>
-document.getElementById('c-new').addEventListener('click', function() {{
-  (window.parent || window).location.href = '?team_pick=new';
-}});
-</script>
-""", height=200)
+</a>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.form("join_form"):
