@@ -355,8 +355,8 @@ if not st.session_state.user_name:
     col_a, col_b = st.columns(2)
     with col_a:
         picked_old = st.session_state.join_pick == "세기말"
-        check_old  = "✅ 선택됨" if picked_old else "&nbsp;"
-        ring_old   = "outline:4px solid #ff99cc;" if picked_old else ""
+        picked_new = st.session_state.join_pick == "새천년"
+        cls_old = "selected" if picked_old else ("dimmed" if picked_new else "")
         components.html(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
@@ -367,34 +367,48 @@ body{{background:transparent;}}
   border-radius:24px;padding:28px 16px 20px;text-align:center;
   cursor:pointer;width:100%;user-select:none;
   box-shadow:0 0 40px #ff449966,0 0 80px #ff449922,inset 0 0 30px #ff449911;
-  {ring_old}
-  transition:transform 0.12s,box-shadow 0.12s;
+  transition:all 0.2s ease;position:relative;overflow:hidden;
 }}
-.card:hover{{transform:scale(1.02);box-shadow:0 0 60px #ff4499aa,0 0 120px #ff449944;}}
+.card.selected{{
+  outline:5px solid #ff99cc;
+  transform:scale(1.04);
+  box-shadow:0 0 80px #ff4499cc,0 0 160px #ff449966,inset 0 0 60px #ff449933;
+  filter:brightness(1.3);
+}}
+.card.dimmed{{
+  opacity:0.28;
+  filter:grayscale(0.5) brightness(0.55);
+  transform:scale(0.95);
+}}
+.card:not(.selected):not(.dimmed):hover{{transform:scale(1.02);}}
 .card:active{{transform:scale(0.97);}}
 .sub{{color:#ff4499;font-size:0.82rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;}}
 .name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.4rem,5vw,2rem);color:#ff99cc;letter-spacing:4px;text-shadow:0 0 10px #ff4499cc,0 0 20px #ff449988;}}
 .ico{{font-size:2.5rem;margin:12px 0 8px;line-height:1;}}
-.chk{{color:#ff99cc;font-size:0.88rem;font-weight:700;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;min-height:1.3rem;}}
+.badge{{display:none;position:absolute;top:12px;right:14px;background:#ff4499;color:#fff;
+        font-size:0.75rem;font-weight:900;border-radius:20px;padding:3px 10px;
+        letter-spacing:1px;font-family:'Noto Sans KR',sans-serif;
+        box-shadow:0 0 12px #ff4499;}}
+.selected .badge{{display:block;}}
 </style>
-<div class="card" onclick="
+<div class="card {cls_old}" onclick="
   var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
   if(btns[0])btns[0].click();
 ">
+  <div class="badge">✅ 선택됨</div>
   <div class="sub">99년생 + 홀수 출생</div>
   <div class="name">세기말 팀</div>
   <div class="ico">🩷</div>
-  <div class="chk">{check_old}</div>
 </div>
-""", height=210)
+""", height=190)
         if st.button("_pick_old", key="pick_old"):
             st.session_state.join_pick = "세기말"
             st.rerun()
 
     with col_b:
+        picked_old = st.session_state.join_pick == "세기말"
         picked_new = st.session_state.join_pick == "새천년"
-        check_new  = "✅ 선택됨" if picked_new else "&nbsp;"
-        ring_new   = "outline:4px solid #aaddff;" if picked_new else ""
+        cls_new = "selected" if picked_new else ("dimmed" if picked_old else "")
         components.html(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
@@ -405,26 +419,40 @@ body{{background:transparent;}}
   border-radius:24px;padding:28px 16px 20px;text-align:center;
   cursor:pointer;width:100%;user-select:none;
   box-shadow:0 0 40px #66ccff66,0 0 80px #66ccff22,inset 0 0 30px #66ccff11;
-  {ring_new}
-  transition:transform 0.12s,box-shadow 0.12s;
+  transition:all 0.2s ease;position:relative;overflow:hidden;
 }}
-.card:hover{{transform:scale(1.02);box-shadow:0 0 60px #66ccffaa,0 0 120px #66ccff44;}}
+.card.selected{{
+  outline:5px solid #aaddff;
+  transform:scale(1.04);
+  box-shadow:0 0 80px #66ccffcc,0 0 160px #66ccff66,inset 0 0 60px #66ccff33;
+  filter:brightness(1.3);
+}}
+.card.dimmed{{
+  opacity:0.28;
+  filter:grayscale(0.5) brightness(0.55);
+  transform:scale(0.95);
+}}
+.card:not(.selected):not(.dimmed):hover{{transform:scale(1.02);}}
 .card:active{{transform:scale(0.97);}}
 .sub{{color:#66ccff;font-size:0.82rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;}}
 .name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.4rem,5vw,2rem);color:#aaddff;letter-spacing:4px;text-shadow:0 0 10px #66ccffcc,0 0 20px #66ccff88;}}
 .ico{{font-size:2.5rem;margin:12px 0 8px;line-height:1;}}
-.chk{{color:#aaddff;font-size:0.88rem;font-weight:700;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;min-height:1.3rem;}}
+.badge{{display:none;position:absolute;top:12px;right:14px;background:#66ccff;color:#001a33;
+        font-size:0.75rem;font-weight:900;border-radius:20px;padding:3px 10px;
+        letter-spacing:1px;font-family:'Noto Sans KR',sans-serif;
+        box-shadow:0 0 12px #66ccff;}}
+.selected .badge{{display:block;}}
 </style>
-<div class="card" onclick="
+<div class="card {cls_new}" onclick="
   var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
   if(btns[1])btns[1].click();
 ">
+  <div class="badge">✅ 선택됨</div>
   <div class="sub">00년생 + 짝수 출생</div>
   <div class="name">새천년 팀</div>
   <div class="ico">🩵</div>
-  <div class="chk">{check_new}</div>
 </div>
-""", height=210)
+""", height=190)
         if st.button("_pick_new", key="pick_new"):
             st.session_state.join_pick = "새천년"
             st.rerun()
