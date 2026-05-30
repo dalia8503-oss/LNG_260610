@@ -357,30 +357,14 @@ if not st.session_state.user_name:
     with col_a:
         sel_old = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #ff4499cc;filter:brightness(1.25);" if picked_old else ""
         dim_old = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_new else ""
-        chk_old = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_old else ""
-        st.markdown(f"""
-<a href="?team_pick=old" style="text-decoration:none;display:block;margin-bottom:8px;">
-  <div class="score-card card-old" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_old}{dim_old}">
-    {chk_old}
-    <div class="sub-text">99년생 + 홀수 출생</div>
-    <div class="team-name">세기말 팀</div>
-    <div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩷</div>
-  </div>
-</a>""", unsafe_allow_html=True)
+        chk_old = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_old else ""
+        st.markdown(f'<div class="score-card card-old" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_old}{dim_old}"><a href="?team_pick=old" target="_self" style="position:absolute;inset:0;border-radius:22px;z-index:100;display:block;"></a>{chk_old}<div class="sub-text">99년생 + 홀수 출생</div><div class="team-name">세기말 팀</div><div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩷</div></div>', unsafe_allow_html=True)
 
     with col_b:
         sel_new = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #66ccffcc;filter:brightness(1.25);" if picked_new else ""
         dim_new = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_old else ""
-        chk_new = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_new else ""
-        st.markdown(f"""
-<a href="?team_pick=new" style="text-decoration:none;display:block;margin-bottom:8px;">
-  <div class="score-card card-new" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_new}{dim_new}">
-    {chk_new}
-    <div class="sub-text">00년생 + 짝수 출생</div>
-    <div class="team-name">새천년 팀</div>
-    <div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩵</div>
-  </div>
-</a>""", unsafe_allow_html=True)
+        chk_new = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_new else ""
+        st.markdown(f'<div class="score-card card-new" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_new}{dim_new}"><a href="?team_pick=new" target="_self" style="position:absolute;inset:0;border-radius:22px;z-index:100;display:block;"></a>{chk_new}<div class="sub-text">00년생 + 짝수 출생</div><div class="team-name">새천년 팀</div><div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩵</div></div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.form("join_form"):
