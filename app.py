@@ -30,8 +30,9 @@ def _store() -> dict:
         "cheers":    [],   # list of {"team","name","msg"}
         "mission":   None,
         "photos":    [],   # list of {"orig_name","size","team","uploader","data":bytes}
-        "broadcast":     None, # {"team","name","msg","bid":str} or None
-        "mission_flash": None, # {"mission":str,"mid":str,"expires":float} or None
+        "broadcast":       None, # {"team","name","msg","bid":str} or None
+        "broadcast_queue": [],   # 대기 중인 응원 멘트 방송
+        "mission_flash":   None, # {"mission":str,"mid":str,"expires":float} or None
         "_lock":     threading.Lock(),
     }
 
@@ -40,7 +41,11 @@ def load_data() -> dict:
     s = _store()
     with s["_lock"]:
         if s["broadcast"] and time.time() > s["broadcast"].get("expires", 0):
-            s["broadcast"] = None
+            if s["broadcast_queue"]:
+                _next = s["broadcast_queue"].pop(0)
+                s["broadcast"] = {**_next, "bid": hashlib.md5(str(random.random()).encode()).hexdigest()[:8], "expires": time.time() + 9}
+            else:
+                s["broadcast"] = None
         if s["mission_flash"] and time.time() > s["mission_flash"].get("expires", 0):
             s["mission_flash"] = None
         return {
@@ -49,15 +54,16 @@ def load_data() -> dict:
             "cheers":    copy.deepcopy(s["cheers"]),
             "mission":   s["mission"],
             "photos":    list(s["photos"]),   # 사진 bytes는 참조 공유
-            "broadcast":     s["broadcast"],
-            "mission_flash": s["mission_flash"],
+            "broadcast":       s["broadcast"],
+            "broadcast_queue": list(s["broadcast_queue"]),
+            "mission_flash":   s["mission_flash"],
         }
 
 
 def save_data(data: dict):
     s = _store()
     with s["_lock"]:
-        for k in ("score_old", "score_new", "cheers", "mission", "photos", "broadcast", "mission_flash"):
+        for k in ("score_old", "score_new", "cheers", "mission", "photos", "broadcast", "broadcast_queue", "mission_flash"):
             s[k] = data[k]
 
 
@@ -1000,11 +1006,12 @@ with tab1:
             text = cheer_text.strip()
             if text:
                 d = load_data()
-                d["cheers"].insert(0, {
-                    "team": st.session_state.user_team,
-                    "name": st.session_state.user_name,
-                    "msg":  text,
-                })
+                new_cheer = {"team": st.session_state.user_team, "name": st.session_state.user_name, "msg": text}
+                d["cheers"].insert(0, new_cheer)
+                if not d.get("broadcast"):
+                    d["broadcast"] = {**new_cheer, "bid": hashlib.md5(str(random.random()).encode()).hexdigest()[:8], "expires": time.time() + 9}
+                else:
+                    d["broadcast_queue"].append(new_cheer)
                 save_data(d)
                 st.session_state.cheer_draft = ""
                 st.rerun()
