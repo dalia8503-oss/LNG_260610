@@ -344,27 +344,33 @@ if not st.session_state.user_name:
 
     col_a, col_b = st.columns(2)
     with col_a:
-        sel_old   = "selected" if st.session_state.join_pick == "세기말" else ""
-        check_old = "✅" if st.session_state.join_pick == "세기말" else ""
+        picked_old = st.session_state.join_pick == "세기말"
+        check_old  = "✅ 선택됨" if picked_old else ""
+        outline_old = "outline: 4px solid #ff99cc;" if picked_old else ""
         st.markdown(f"""
-        <div class="team-join-card card-old-join {sel_old}">
-          <div class="card-team-name" style="color:#ff4499;">세기말 팀</div>
-          <div class="card-team-sub" style="color:#cc3377;">99년생 + 홀수 출생</div>
-          <div class="card-check">{check_old}</div>
+        <div class="score-card card-old" style="padding:24px 16px 20px;{outline_old}">
+          <div class="sub-text">99년생 + 홀수 출생</div>
+          <div class="team-name">세기말 팀</div>
+          <div style="font-size:2.8rem;margin:14px 0 8px;">🩷</div>
+          <div style="color:#ff99cc;font-size:1rem;font-weight:700;min-height:1.6rem;letter-spacing:2px;">{check_old}</div>
         </div>""", unsafe_allow_html=True)
-        if st.button("🩷 세기말 선택", key="pick_old", use_container_width=True):
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+        if st.button("🩷 세기말 팀 선택", key="pick_old", use_container_width=True):
             st.session_state.join_pick = "세기말"
             st.rerun()
     with col_b:
-        sel_new   = "selected" if st.session_state.join_pick == "새천년" else ""
-        check_new = "✅" if st.session_state.join_pick == "새천년" else ""
+        picked_new = st.session_state.join_pick == "새천년"
+        check_new  = "✅ 선택됨" if picked_new else ""
+        outline_new = "outline: 4px solid #aaddff;" if picked_new else ""
         st.markdown(f"""
-        <div class="team-join-card card-new-join {sel_new}">
-          <div class="card-team-name" style="color:#66ccff;">새천년 팀</div>
-          <div class="card-team-sub" style="color:#4499bb;">00년생 + 짝수 출생</div>
-          <div class="card-check">{check_new}</div>
+        <div class="score-card card-new" style="padding:24px 16px 20px;{outline_new}">
+          <div class="sub-text">00년생 + 짝수 출생</div>
+          <div class="team-name">새천년 팀</div>
+          <div style="font-size:2.8rem;margin:14px 0 8px;">🩵</div>
+          <div style="color:#aaddff;font-size:1rem;font-weight:700;min-height:1.6rem;letter-spacing:2px;">{check_new}</div>
         </div>""", unsafe_allow_html=True)
-        if st.button("🩵 새천년 선택", key="pick_new", use_container_width=True):
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+        if st.button("🩵 새천년 팀 선택", key="pick_new", use_container_width=True):
             st.session_state.join_pick = "새천년"
             st.rerun()
 
