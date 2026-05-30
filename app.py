@@ -342,35 +342,90 @@ if not st.session_state.user_name:
     st.markdown('<div class="join-title">⚾ LNG선공사팀 발야구 대회 ⚾</div>', unsafe_allow_html=True)
     st.markdown('<div class="join-sub">팀을 선택하고 이름을 입력해 입장하세요</div>', unsafe_allow_html=True)
 
+    # 팀 선택 버튼을 숨기고 카드 클릭으로 대체
+    st.markdown("""
+    <style>
+    div[data-testid="stButton"] {
+        height:0 !important; min-height:0 !important;
+        overflow:hidden !important; padding:0 !important; margin:0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     col_a, col_b = st.columns(2)
     with col_a:
         picked_old = st.session_state.join_pick == "세기말"
-        check_old  = "✅ 선택됨" if picked_old else ""
-        outline_old = "outline: 4px solid #ff99cc;" if picked_old else ""
-        st.markdown(f"""
-        <div class="score-card card-old" style="padding:24px 16px 20px;{outline_old}">
-          <div class="sub-text">99년생 + 홀수 출생</div>
-          <div class="team-name">세기말 팀</div>
-          <div style="font-size:2.8rem;margin:14px 0 8px;">🩷</div>
-          <div style="color:#ff99cc;font-size:1rem;font-weight:700;min-height:1.6rem;letter-spacing:2px;">{check_old}</div>
-        </div>""", unsafe_allow_html=True)
-        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-        if st.button("🩷 세기말 팀 선택", key="pick_old", use_container_width=True):
+        check_old  = "✅ 선택됨" if picked_old else "&nbsp;"
+        ring_old   = "outline:4px solid #ff99cc;" if picked_old else ""
+        components.html(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{background:transparent;}}
+.card{{
+  background:linear-gradient(160deg,#33001a 0%,#660033 50%,#33001a 100%);
+  border-radius:24px;padding:28px 16px 20px;text-align:center;
+  cursor:pointer;width:100%;user-select:none;
+  box-shadow:0 0 40px #ff449966,0 0 80px #ff449922,inset 0 0 30px #ff449911;
+  {ring_old}
+  transition:transform 0.12s,box-shadow 0.12s;
+}}
+.card:hover{{transform:scale(1.02);box-shadow:0 0 60px #ff4499aa,0 0 120px #ff449944;}}
+.card:active{{transform:scale(0.97);}}
+.sub{{color:#ff4499;font-size:0.82rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;}}
+.name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.4rem,5vw,2rem);color:#ff99cc;letter-spacing:4px;text-shadow:0 0 10px #ff4499cc,0 0 20px #ff449988;}}
+.ico{{font-size:2.5rem;margin:12px 0 8px;line-height:1;}}
+.chk{{color:#ff99cc;font-size:0.88rem;font-weight:700;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;min-height:1.3rem;}}
+</style>
+<div class="card" onclick="
+  var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
+  if(btns[0])btns[0].click();
+">
+  <div class="sub">99년생 + 홀수 출생</div>
+  <div class="name">세기말 팀</div>
+  <div class="ico">🩷</div>
+  <div class="chk">{check_old}</div>
+</div>
+""", height=210)
+        if st.button("_pick_old", key="pick_old"):
             st.session_state.join_pick = "세기말"
             st.rerun()
+
     with col_b:
         picked_new = st.session_state.join_pick == "새천년"
-        check_new  = "✅ 선택됨" if picked_new else ""
-        outline_new = "outline: 4px solid #aaddff;" if picked_new else ""
-        st.markdown(f"""
-        <div class="score-card card-new" style="padding:24px 16px 20px;{outline_new}">
-          <div class="sub-text">00년생 + 짝수 출생</div>
-          <div class="team-name">새천년 팀</div>
-          <div style="font-size:2.8rem;margin:14px 0 8px;">🩵</div>
-          <div style="color:#aaddff;font-size:1rem;font-weight:700;min-height:1.6rem;letter-spacing:2px;">{check_new}</div>
-        </div>""", unsafe_allow_html=True)
-        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-        if st.button("🩵 새천년 팀 선택", key="pick_new", use_container_width=True):
+        check_new  = "✅ 선택됨" if picked_new else "&nbsp;"
+        ring_new   = "outline:4px solid #aaddff;" if picked_new else ""
+        components.html(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{background:transparent;}}
+.card{{
+  background:linear-gradient(160deg,#001a33 0%,#003366 50%,#001a33 100%);
+  border-radius:24px;padding:28px 16px 20px;text-align:center;
+  cursor:pointer;width:100%;user-select:none;
+  box-shadow:0 0 40px #66ccff66,0 0 80px #66ccff22,inset 0 0 30px #66ccff11;
+  {ring_new}
+  transition:transform 0.12s,box-shadow 0.12s;
+}}
+.card:hover{{transform:scale(1.02);box-shadow:0 0 60px #66ccffaa,0 0 120px #66ccff44;}}
+.card:active{{transform:scale(0.97);}}
+.sub{{color:#66ccff;font-size:0.82rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:6px;}}
+.name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.4rem,5vw,2rem);color:#aaddff;letter-spacing:4px;text-shadow:0 0 10px #66ccffcc,0 0 20px #66ccff88;}}
+.ico{{font-size:2.5rem;margin:12px 0 8px;line-height:1;}}
+.chk{{color:#aaddff;font-size:0.88rem;font-weight:700;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;min-height:1.3rem;}}
+</style>
+<div class="card" onclick="
+  var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
+  if(btns[1])btns[1].click();
+">
+  <div class="sub">00년생 + 짝수 출생</div>
+  <div class="name">새천년 팀</div>
+  <div class="ico">🩵</div>
+  <div class="chk">{check_new}</div>
+</div>
+""", height=210)
+        if st.button("_pick_new", key="pick_new"):
             st.session_state.join_pick = "새천년"
             st.rerun()
 
