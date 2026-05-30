@@ -13,7 +13,7 @@ import zipfile
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(
-    page_title="⚾ LNG 발야구 대회",
+    page_title="LNG선공사팀 Cheer-up day",
     page_icon="⚾",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -339,7 +339,8 @@ st.markdown("""
 if not st.session_state.user_name:
 
     st.markdown('<div class="join-wrap">', unsafe_allow_html=True)
-    st.markdown('<div class="join-title">⚾ LNG선공사팀 발야구 대회 ⚾</div>', unsafe_allow_html=True)
+    st.markdown('<div class="join-title">LNG선공사팀 Cheer-up day</div>', unsafe_allow_html=True)
+    st.markdown('<div class="join-title" style="font-size:clamp(1.2rem,4vw,2rem);margin-top:-8px;">⚾ 발야구 대결 ⚾</div>', unsafe_allow_html=True)
     st.markdown('<div class="join-sub">팀을 선택하고 이름을 입력해 입장하세요</div>', unsafe_allow_html=True)
 
     # 팀 선택 버튼을 숨기고 카드 클릭으로 대체
@@ -370,7 +371,7 @@ body{{background:transparent;}}
   transition:all 0.2s ease;position:relative;overflow:hidden;
 }}
 .card.selected{{
-  outline:5px solid #ff99cc;
+  outline:5px solid #ffffff;
   transform:scale(1.04);
   box-shadow:0 0 80px #ff4499cc,0 0 160px #ff449966,inset 0 0 60px #ff449933;
   filter:brightness(1.3);
@@ -422,7 +423,7 @@ body{{background:transparent;}}
   transition:all 0.2s ease;position:relative;overflow:hidden;
 }}
 .card.selected{{
-  outline:5px solid #aaddff;
+  outline:5px solid #ffffff;
   transform:scale(1.04);
   box-shadow:0 0 80px #66ccffcc,0 0 160px #66ccff66,inset 0 0 60px #66ccff33;
   filter:brightness(1.3);
@@ -493,7 +494,11 @@ if st.session_state.user_team == "admin":
     <div style="text-align:center; padding:12px 0 4px;">
       <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.6rem,5vw,2.8rem);
                    color:#ffffff; text-shadow:0 0 20px rgba(255,255,255,0.4);">
-        ⚾ LNG선공사팀 발야구 대회 ⚾
+        LNG선공사팀 Cheer-up day
+      </span><br>
+      <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1rem,3vw,1.8rem);
+                   color:#ffffff; text-shadow:0 0 16px rgba(255,255,255,0.3);">
+        ⚾ 발야구 대결 ⚾
       </span><br><br>
       <span style="background:#cc0000; color:#fff; font-weight:900; border-radius:8px;
                    padding:4px 18px; font-size:1rem; letter-spacing:3px; box-shadow:0 0 16px #cc000088;">
@@ -707,7 +712,11 @@ st.markdown(f"""
 <div style="text-align:center; padding: 12px 0 4px;">
   <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.6rem,5vw,2.8rem);
                color:#ffffff; text-shadow:0 0 20px rgba(255,255,255,0.4);">
-    ⚾ LNG선공사팀 발야구 대회 ⚾
+    LNG선공사팀 Cheer-up day
+  </span><br>
+  <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(0.9rem,2.5vw,1.5rem);
+               color:#ffffff; text-shadow:0 0 14px rgba(255,255,255,0.3);">
+    ⚾ 발야구 대결 ⚾
   </span><br>
   <span style="color:#aaaaaa; font-size:0.9rem; letter-spacing:2px;">세기말 팀 🆚 새천년 팀</span>
   &nbsp;&nbsp;
