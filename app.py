@@ -343,28 +343,56 @@ if not st.session_state.user_name:
     st.markdown('<div class="join-title" style="font-size:clamp(1.2rem,4vw,2rem);margin-top:-8px;">⚾ 발야구 대결 ⚾</div>', unsafe_allow_html=True)
     st.markdown('<div class="join-sub">팀을 선택하고 이름을 입력해 입장하세요</div>', unsafe_allow_html=True)
 
-    # URL 파라미터로 팀 선택 처리
-    _tp = st.query_params.get('team_pick', '')
-    if _tp == 'old':
-        st.session_state.join_pick = '세기말'
-    elif _tp == 'new':
-        st.session_state.join_pick = '새천년'
-
     picked_old = st.session_state.join_pick == "세기말"
     picked_new = st.session_state.join_pick == "새천년"
 
+    _tsel_css = """<style>
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"] div[data-testid="stButton"] button {
+    min-height: 160px !important; border-radius: 22px !important; padding: 24px 16px !important;
+    font-size: 1rem !important; line-height: 1.8 !important; transition: all 0.25s ease !important;
+}
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"] div[data-testid="stButton"] button p {
+    white-space: pre-line !important; line-height: 1.8 !important; font-size: 1rem !important; margin: 0 !important;
+}
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-of-type div[data-testid="stButton"] button {
+    background: linear-gradient(135deg,#2a0a1f 60%,#4a1040) !important;
+    border: 2px solid #ff4499 !important; color: #ffaacc !important; box-shadow: 0 0 30px #ff449944 !important;
+}
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type div[data-testid="stButton"] button {
+    background: linear-gradient(135deg,#0a1a2f 60%,#103050) !important;
+    border: 2px solid #66ccff !important; color: #aaddff !important; box-shadow: 0 0 30px #66ccff44 !important;
+}"""
+    if picked_old:
+        _tsel_css += """
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-of-type div[data-testid="stButton"] button {
+    border: 4px solid #ffffff !important; filter: brightness(1.25) !important;
+    box-shadow: 0 0 0 3px #ffffff66, 0 0 60px #ff4499cc !important;
+}
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type div[data-testid="stButton"] button {
+    opacity: 0.2 !important; filter: grayscale(0.5) brightness(0.5) !important;
+}"""
+    elif picked_new:
+        _tsel_css += """
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:first-of-type div[data-testid="stButton"] button {
+    opacity: 0.2 !important; filter: grayscale(0.5) brightness(0.5) !important;
+}
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type div[data-testid="stButton"] button {
+    border: 4px solid #ffffff !important; filter: brightness(1.25) !important;
+    box-shadow: 0 0 0 3px #ffffff66, 0 0 60px #66ccffcc !important;
+}"""
+    st.markdown(_tsel_css + "</style>", unsafe_allow_html=True)
+
     col_a, col_b = st.columns(2)
     with col_a:
-        sel_old = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #ff4499cc;filter:brightness(1.25);" if picked_old else ""
-        dim_old = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_new else ""
-        chk_old = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_old else ""
-        st.markdown(f'<div class="score-card card-old" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_old}{dim_old}"><a href="?team_pick=old" target="_self" style="position:absolute;inset:0;border-radius:22px;z-index:100;display:block;"></a>{chk_old}<div class="sub-text">99년생 + 홀수 출생</div><div class="team-name">세기말 팀</div><div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩷</div></div>', unsafe_allow_html=True)
-
+        _lbl_old = ("✅ **선택됨**  \n" if picked_old else "") + "99년생 + 홀수 출생  \n**세기말 팀**  \n🩷"
+        if st.button(_lbl_old, key="btn_pick_old", use_container_width=True):
+            st.session_state.join_pick = '세기말'
+            st.rerun()
     with col_b:
-        sel_new = "border:4px solid #ffffff;box-shadow:0 0 0 3px #ffffff66,0 0 60px #66ccffcc;filter:brightness(1.25);" if picked_new else ""
-        dim_new = "opacity:0.2;filter:grayscale(0.5) brightness(0.5);" if picked_old else ""
-        chk_new = '<div style="position:absolute;inset:0;border-radius:22px;background:rgba(0,0,0,0.6);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;"><div style="font-size:3.5rem;line-height:1;">✅</div><div style="color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;font-family:sans-serif;">선택됨</div></div>' if picked_new else ""
-        st.markdown(f'<div class="score-card card-new" style="padding:28px 16px 20px;cursor:pointer;position:relative;{sel_new}{dim_new}"><a href="?team_pick=new" target="_self" style="position:absolute;inset:0;border-radius:22px;z-index:100;display:block;"></a>{chk_new}<div class="sub-text">00년생 + 짝수 출생</div><div class="team-name">새천년 팀</div><div style="font-size:2.8rem;margin:14px 0 8px;line-height:1;">🩵</div></div>', unsafe_allow_html=True)
+        _lbl_new = ("✅ **선택됨**  \n" if picked_new else "") + "00년생 + 짝수 출생  \n**새천년 팀**  \n🩵"
+        if st.button(_lbl_new, key="btn_pick_new", use_container_width=True):
+            st.session_state.join_pick = '새천년'
+            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.form("join_form"):
