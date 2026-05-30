@@ -346,10 +346,7 @@ if not st.session_state.user_name:
     # 팀 선택 버튼을 숨기고 카드 클릭으로 대체
     st.markdown("""
     <style>
-    div[data-testid="stButton"] {
-        height:0 !important; min-height:0 !important;
-        overflow:hidden !important; padding:0 !important; margin:0 !important;
-    }
+    div[data-testid="stButton"] { display:none !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -371,7 +368,7 @@ body{{background:transparent;}}
   cursor:pointer;width:100%;user-select:none;
   border:4px solid #ff449944;
   box-shadow:0 0 40px #ff449966,0 0 80px #ff449922;
-  transition:all 0.2s ease;
+  transition:all 0.2s ease; position:relative;
 }}
 .card.selected{{
   border:5px solid #ffffff;
@@ -385,24 +382,34 @@ body{{background:transparent;}}
 }}
 .card:not(.selected):not(.dimmed):hover{{filter:brightness(1.1);}}
 .card:active{{transform:scale(0.97);}}
-.chk-wrap{{height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}}
-.chk{{visibility:{chk_vis};background:#ffffff;color:#33001a;font-size:0.82rem;font-weight:900;
-      border-radius:20px;padding:4px 14px;letter-spacing:1px;
-      font-family:'Noto Sans KR',sans-serif;white-space:nowrap;}}
 .sub{{color:#ff4499;font-size:0.8rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:4px;}}
 .name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);color:#ff99cc;letter-spacing:4px;
        text-shadow:0 0 10px #ff4499cc,0 0 20px #ff449988;}}
 .ico{{font-size:2.2rem;margin:10px 0 6px;line-height:1;}}
+.bigchk{{display:none;position:absolute;inset:0;border-radius:22px;
+         background:rgba(0,0,0,0.55);align-items:center;justify-content:center;
+         flex-direction:column;}}
+.card.selected .bigchk{{display:flex;}}
+.bigchk-mark{{font-size:4rem;line-height:1;}}
+.bigchk-txt{{color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;
+             font-family:'Noto Sans KR',sans-serif;}}
 </style>
-<div class="card {cls_old}" onclick="
-  var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
-  if(btns[0])btns[0].click();
-">
-  <div class="chk-wrap"><span class="chk">✅ 선택됨</span></div>
+<div class="card {cls_old}" id="c-old">
+  <div class="bigchk">
+    <div class="bigchk-mark">✅</div>
+    <div class="bigchk-txt">선택됨</div>
+  </div>
   <div class="sub">99년생 + 홀수 출생</div>
   <div class="name">세기말 팀</div>
   <div class="ico">🩷</div>
 </div>
+<script>
+document.getElementById('c-old').addEventListener('click', function() {{
+  var p = window.parent || window;
+  var btns = p.document.querySelectorAll('button[data-testid="baseButton-secondary"]');
+  if (btns && btns[0]) btns[0].click();
+}});
+</script>
 """, height=200)
         if st.button("_pick_old", key="pick_old"):
             st.session_state.join_pick = "세기말"
@@ -412,7 +419,6 @@ body{{background:transparent;}}
         picked_old = st.session_state.join_pick == "세기말"
         picked_new = st.session_state.join_pick == "새천년"
         cls_new  = "selected" if picked_new else ("dimmed" if picked_old else "")
-        chk_vis2 = "visible" if picked_new else "hidden"
         components.html(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap');
@@ -424,7 +430,7 @@ body{{background:transparent;}}
   cursor:pointer;width:100%;user-select:none;
   border:4px solid #66ccff44;
   box-shadow:0 0 40px #66ccff66,0 0 80px #66ccff22;
-  transition:all 0.2s ease;
+  transition:all 0.2s ease; position:relative;
 }}
 .card.selected{{
   border:5px solid #ffffff;
@@ -438,24 +444,34 @@ body{{background:transparent;}}
 }}
 .card:not(.selected):not(.dimmed):hover{{filter:brightness(1.1);}}
 .card:active{{transform:scale(0.97);}}
-.chk-wrap{{height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}}
-.chk{{visibility:{chk_vis2};background:#ffffff;color:#001a33;font-size:0.82rem;font-weight:900;
-      border-radius:20px;padding:4px 14px;letter-spacing:1px;
-      font-family:'Noto Sans KR',sans-serif;white-space:nowrap;}}
 .sub{{color:#66ccff;font-size:0.8rem;letter-spacing:2px;font-family:'Noto Sans KR',sans-serif;margin-bottom:4px;}}
 .name{{font-family:'Black Han Sans',sans-serif;font-size:clamp(1.3rem,5vw,1.9rem);color:#aaddff;letter-spacing:4px;
        text-shadow:0 0 10px #66ccffcc,0 0 20px #66ccff88;}}
 .ico{{font-size:2.2rem;margin:10px 0 6px;line-height:1;}}
+.bigchk{{display:none;position:absolute;inset:0;border-radius:22px;
+         background:rgba(0,0,0,0.55);align-items:center;justify-content:center;
+         flex-direction:column;}}
+.card.selected .bigchk{{display:flex;}}
+.bigchk-mark{{font-size:4rem;line-height:1;}}
+.bigchk-txt{{color:#fff;font-size:1rem;font-weight:900;letter-spacing:2px;margin-top:8px;
+             font-family:'Noto Sans KR',sans-serif;}}
 </style>
-<div class="card {cls_new}" onclick="
-  var btns=(window.parent||window).document.querySelectorAll('button[data-testid=\\"baseButton-secondary\\"]');
-  if(btns[1])btns[1].click();
-">
-  <div class="chk-wrap"><span class="chk">✅ 선택됨</span></div>
+<div class="card {cls_new}" id="c-new">
+  <div class="bigchk">
+    <div class="bigchk-mark">✅</div>
+    <div class="bigchk-txt">선택됨</div>
+  </div>
   <div class="sub">00년생 + 짝수 출생</div>
   <div class="name">새천년 팀</div>
   <div class="ico">🩵</div>
 </div>
+<script>
+document.getElementById('c-new').addEventListener('click', function() {{
+  var p = window.parent || window;
+  var btns = p.document.querySelectorAll('button[data-testid="baseButton-secondary"]');
+  if (btns && btns[1]) btns[1].click();
+}});
+</script>
 """, height=200)
         if st.button("_pick_new", key="pick_new"):
             st.session_state.join_pick = "새천년"
