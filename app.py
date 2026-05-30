@@ -33,6 +33,7 @@ def _store() -> dict:
         "broadcast":       None, # {"team","name","msg","bid":str} or None
         "broadcast_queue": [],   # 대기 중인 응원 멘트 방송
         "mission_flash":   None, # {"mission":str,"mid":str,"expires":float} or None
+        "haiku":           [],   # list of {"hid","word","team","name","lines":[],"likes","liked_by":[]}
         "_lock":     threading.Lock(),
     }
 
@@ -57,13 +58,14 @@ def load_data() -> dict:
             "broadcast":       s["broadcast"],
             "broadcast_queue": list(s["broadcast_queue"]),
             "mission_flash":   s["mission_flash"],
+            "haiku":           copy.deepcopy(s["haiku"]),
         }
 
 
 def save_data(data: dict):
     s = _store()
     with s["_lock"]:
-        for k in ("score_old", "score_new", "cheers", "mission", "photos", "broadcast", "broadcast_queue", "mission_flash"):
+        for k in ("score_old", "score_new", "cheers", "mission", "photos", "broadcast", "broadcast_queue", "mission_flash", "haiku"):
             s[k] = data[k]
 
 
@@ -464,6 +466,22 @@ if st.session_state.user_team == "admin":
             st.markdown(f'<div class="mission-box" style="padding:16px 24px;"><div class="mission-text" style="font-size:clamp(1.4rem,4vw,2.4rem);">{data["mission"]}</div></div>', unsafe_allow_html=True)
         else:
             st.info("현재 발동된 미션 없음")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("**💝 3행시 좋아요 랭킹**")
+        _haiku_sorted = sorted(data.get("haiku", []), key=lambda x: x["likes"], reverse=True)
+        if _haiku_sorted:
+            _medals = ["🥇", "🥈", "🥉"]
+            for _ri, _h in enumerate(_haiku_sorted[:10]):
+                _medal = _medals[_ri] if _ri < 3 else f"{_ri+1}위"
+                _badge_cls = "cheer-badge-old" if _h["team"] == "세기말" else "cheer-badge-new"
+                _wc = "#ff8844" if _h["word"] == "세기말" else "#44ccff"
+                _tc = "#ff4499" if _h["team"] == "세기말" else "#66ccff"
+                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 16px;margin-bottom:6px;border-left:4px solid {_tc};display:flex;align-items:center;gap:12px;"><span style="font-size:1.3rem;min-width:36px;">{_medal}</span><span class="{_badge_cls}">{_h["team"]}</span><b style="color:#fff;margin-left:4px;">{_h["name"]}</b><span style="color:{_wc};font-size:0.85rem;margin-left:4px;">#{_h["word"]}</span><span style="margin-left:auto;color:#ff6699;font-size:1.1rem;font-weight:900;">❤️ {_h["likes"]}</span></div>', unsafe_allow_html=True)
+            if st.button("🗑️ 3행시 전체 초기화", key="adm_haiku_reset"):
+                d = load_data(); d["haiku"] = []; save_data(d); st.rerun()
+        else:
+            st.info("아직 등록된 3행시가 없습니다.")
 
     with atab2:
         st.markdown("#### 🏟️ 점수 조작")
@@ -927,7 +945,7 @@ if _bdata.get("mission_flash"):
 </script>
 """, height=0)
 
-tab1, tab2 = st.tabs(["🏟️ 전광판 & 미션", "📸 현장 르포 사진방"])
+tab1, tab2, tab3 = st.tabs(["🏟️ 전광판 & 미션", "📸 현장 르포 사진방", "💝 3행시 이벤트"])
 
 
 # ── TAB 1: 전광판 & 미션 ─────────────────────────────────────
@@ -1146,5 +1164,82 @@ with tab2:
             st.download_button("⬇️ 전체 다운로드", data=zip_buf, file_name="발야구_현장사진.zip", mime="application/zip", use_container_width=True)
     else:
         st.markdown('<div style="text-align:center;color:#555;padding:48px 20px;font-size:1rem;border:2px dashed #333;border-radius:16px;">📷 아직 업로드된 사진이 없습니다.<br>위 버튼을 눌러 현장 사진을 공유해 주세요!</div>', unsafe_allow_html=True)
+
+# ── TAB 3: 3행시 이벤트 ──────────────────────────────────────
+HAIKU_WORDS = {"세기말": ["세", "기", "말"], "새천년": ["새", "천", "년"]}
+
+with tab3:
+    st.markdown("""<div style="text-align:center;font-family:'Black Han Sans',sans-serif;
+        font-size:clamp(1.2rem,3.5vw,1.8rem);color:#ff88cc;
+        text-shadow:0 0 10px #ff88cc88;margin-bottom:6px;">💝 3행시 이벤트</div>
+    <div style="text-align:center;color:#aaa;font-size:0.9rem;margin-bottom:20px;">
+        '세기말' 또는 '새천년'으로 3행시를 짓고 하트를 받으세요!<br>
+        ❤️ 가장 많은 하트를 받은 분께 <b style="color:#ffcc44;">선물</b>을 드립니다 🎁
+    </div>""", unsafe_allow_html=True)
+
+    # ── 작성 폼 ──
+    with st.expander("✏️ 3행시 짓기", expanded=True):
+        hw = st.radio("주제 선택", ["세기말", "새천년"], key="haiku_word_radio", horizontal=True)
+        syls = HAIKU_WORDS[hw]
+        wc = "#ff8844" if hw == "세기말" else "#44ccff"
+        st.markdown(f'<div style="color:{wc};font-size:0.85rem;margin:4px 0 8px;">각 줄의 첫 글자: <b>{syls[0]}</b> · <b>{syls[1]}</b> · <b>{syls[2]}</b></div>', unsafe_allow_html=True)
+        hl1 = st.text_input(f"{syls[0]} —", placeholder=f"'{syls[0]}'(으)로 시작하는 첫 번째 줄", key="haiku_l1")
+        hl2 = st.text_input(f"{syls[1]} —", placeholder=f"'{syls[1]}'(으)로 시작하는 두 번째 줄", key="haiku_l2")
+        hl3 = st.text_input(f"{syls[2]} —", placeholder=f"'{syls[2]}'(으)로 시작하는 세 번째 줄", key="haiku_l3")
+        if st.button("💌 3행시 등록", use_container_width=True, type="primary", key="haiku_submit"):
+            _errs = []
+            for _line, _syl, _n in [(hl1.strip(), syls[0], "첫"), (hl2.strip(), syls[1], "두"), (hl3.strip(), syls[2], "세")]:
+                if not _line or not _line.startswith(_syl):
+                    _errs.append(f"{_n} 번째 줄은 **'{_syl}'** 으로 시작해야 합니다.")
+            if _errs:
+                for _e in _errs:
+                    st.error(_e)
+            else:
+                _d = load_data()
+                if any(h["name"] == st.session_state.user_name and h["word"] == hw for h in _d["haiku"]):
+                    st.warning(f"'{hw}' 3행시는 이미 등록하셨습니다! (1인 1작품)")
+                else:
+                    _d["haiku"].insert(0, {
+                        "hid": hashlib.md5(f"{st.session_state.user_name}{time.time()}".encode()).hexdigest()[:10],
+                        "word": hw, "team": st.session_state.user_team,
+                        "name": st.session_state.user_name,
+                        "lines": [hl1.strip(), hl2.strip(), hl3.strip()],
+                        "likes": 0, "liked_by": [],
+                    })
+                    save_data(_d)
+                    st.success("💌 3행시가 등록되었습니다!")
+                    st.rerun()
+
+    # ── 3행시 목록 ──
+    _hdata = load_data()
+    _hlist = sorted(_hdata.get("haiku", []), key=lambda x: x["likes"], reverse=True)
+
+    if not _hlist:
+        st.markdown('<div style="text-align:center;color:#555;padding:40px 20px;font-size:1rem;border:2px dashed #333;border-radius:16px;">아직 등록된 3행시가 없습니다. 첫 번째 주인공이 되어보세요! ✨</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div style="color:#888;font-size:0.9rem;margin:12px 0 8px;text-align:right;">총 {len(_hlist)}편 등록됨</div>', unsafe_allow_html=True)
+        for _h in _hlist:
+            _syls_h = HAIKU_WORDS[_h["word"]]
+            _tc = "#ff4499" if _h["team"] == "세기말" else "#66ccff"
+            _wc2 = "#ff8844" if _h["word"] == "세기말" else "#44ccff"
+            _badge = "cheer-badge-old" if _h["team"] == "세기말" else "cheer-badge-new"
+            _liked = st.session_state.user_name in _h.get("liked_by", [])
+            _is_mine = _h["name"] == st.session_state.user_name
+            _heart = "❤️" if _liked else "🤍"
+            _c_card, _c_like = st.columns([5, 1])
+            with _c_card:
+                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 18px;border-left:4px solid {_tc};margin-bottom:4px;"><div style="margin-bottom:8px;"><span class="{_badge}">{_h["team"]} 팀</span>&nbsp;<b style="color:#fff;">{_h["name"]}</b>&nbsp;<span style="color:{_wc2};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span></div><div style="line-height:2.1;font-size:1rem;color:#eee;"><b style="color:{_wc2};">{_syls_h[0]}</b>{_h["lines"][0][len(_syls_h[0]):]}<br><b style="color:{_wc2};">{_syls_h[1]}</b>{_h["lines"][1][len(_syls_h[1]):]}<br><b style="color:{_wc2};">{_syls_h[2]}</b>{_h["lines"][2][len(_syls_h[2]):]}</div></div>', unsafe_allow_html=True)
+            with _c_like:
+                st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
+                _tip = "내 작품엔 좋아요 불가" if _is_mine else ("이미 좋아요 ❤️" if _liked else "좋아요!")
+                if st.button(f"{_heart} {_h['likes']}", key=f"like_{_h['hid']}", use_container_width=True, disabled=(_liked or _is_mine), help=_tip):
+                    _ld = load_data()
+                    for _entry in _ld["haiku"]:
+                        if _entry["hid"] == _h["hid"] and st.session_state.user_name not in _entry["liked_by"]:
+                            _entry["liked_by"].append(st.session_state.user_name)
+                            _entry["likes"] += 1
+                            break
+                    save_data(_ld)
+                    st.rerun()
 
 st.markdown('<div style="text-align:center;color:#444;font-size:0.8rem;margin-top:48px;padding-bottom:16px;">⚾ LNG선공사팀 발야구 대회 | 세기말 vs 새천년 ⚾</div>', unsafe_allow_html=True)
