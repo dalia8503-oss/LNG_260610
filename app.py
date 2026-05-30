@@ -121,29 +121,6 @@ def generate_ai_cheer(team: str, score_old: int, score_new: int, api_key: str) -
     return resp.json()["choices"][0]["message"]["content"].strip().strip('"').strip("'")
 
 
-def generate_ai_photo_caption(uploader: str, team: str, api_key: str) -> str:
-    prompt = (
-        f"LNG선공사팀 체육행사 발야구 경기 현장 사진입니다.\n"
-        f"촬영: {team} 팀 {uploader}\n\n"
-        f"이 사진에 붙일 재미있고 유쾌한 한줄 캡션을 1개만 만들어 주세요.\n"
-        f"- 발야구, 체육행사, 운동회 분위기에 맞게\n"
-        f"- 20자 이내\n"
-        f"- 이모지 1~2개 포함\n"
-        f"- 캡션 텍스트만 출력 (번호·설명 없이)"
-    )
-    resp = requests.post(
-        "https://api.upstage.ai/v1/chat/completions",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-        json={
-            "model": "solar-mini",
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 60,
-            "temperature": 1.2,
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip().strip('"').strip("'")
 
 
 # ── 전역 스타일 ──────────────────────────────────────────────
@@ -633,8 +610,7 @@ if st.session_state.user_team == "admin":
                 p_cols = st.columns(cols_per_row)
                 for col, (idx, photo) in zip(p_cols, row):
                     with col:
-                        ai_cap = photo.get("caption", "")
-                        cap = f"{photo.get('team','')} 팀 · {photo.get('uploader','')}{'  ' + ai_cap if ai_cap else ''}"
+                        cap = f"{photo.get('team','')} 팀 · {photo.get('uploader','')}"
                         st.image(Image.open(io.BytesIO(photo["data"])), use_container_width=True, caption=cap)
                         if st.button("🗑️ 삭제", key=f"adm_del_photo_{idx}", use_container_width=True):
                             d = load_data(); d["photos"].pop(idx); save_data(d); st.rerun()
@@ -1077,37 +1053,68 @@ with tab2:
         label_visibility="visible",
     )
 
+    if "photo_rotations" not in st.session_state:
+        st.session_state.photo_rotations = {}
+
     if uploaded:
-        new_count = 0
-        for file in uploaded:
-            img_bytes = file.read()
+        current_names = {f.name for f in uploaded}
+        st.session_state.photo_rotations = {k: v for k, v in st.session_state.photo_rotations.items() if k in current_names}
+
+        st.markdown('<div style="color:#aaa;font-size:0.9rem;margin:8px 0 4px;">↩️ ↪️ 버튼으로 회전 후 등록하세요</div>', unsafe_allow_html=True)
+        prev_rows = [uploaded[i:i+3] for i in range(0, len(uploaded), 3)]
+        for row_files in prev_rows:
+            prev_cols = st.columns(len(row_files))
+            for col, file in zip(prev_cols, row_files):
+                with col:
+                    rot = st.session_state.photo_rotations.get(file.name, 0)
+                    try:
+                        img = Image.open(io.BytesIO(file.getvalue()))
+                        if rot:
+                            img = img.rotate(rot, expand=True)
+                        st.image(img, use_container_width=True, caption=file.name)
+                    except Exception:
+                        st.warning(f"이미지 오류: {file.name}")
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        if st.button("↩️", key=f"rot_l_{file.name}", use_container_width=True, help="왼쪽 90° 회전"):
+                            st.session_state.photo_rotations[file.name] = (rot + 90) % 360
+                            st.rerun()
+                    with c2:
+                        if st.button("↪️", key=f"rot_r_{file.name}", use_container_width=True, help="오른쪽 90° 회전"):
+                            st.session_state.photo_rotations[file.name] = (rot - 90) % 360
+                            st.rerun()
+
+        if st.button("📸 사진 등록하기", use_container_width=True, type="primary"):
+            new_count = 0
             d = load_data()
-            if any(p["orig_name"] == file.name and p["size"] == len(img_bytes) for p in d["photos"]):
-                continue
-            try:
-                img = Image.open(io.BytesIO(img_bytes))
-                img.verify()
-                caption = ""
+            for file in uploaded:
+                orig_bytes = file.getvalue()
+                if any(p["orig_name"] == file.name and p["size"] == len(orig_bytes) for p in d["photos"]):
+                    continue
                 try:
-                    api_key = st.secrets["UPSTAGE_API_KEY"]
-                    caption = generate_ai_photo_caption(st.session_state.user_name, st.session_state.user_team, api_key)
+                    rot = st.session_state.photo_rotations.get(file.name, 0)
+                    img = Image.open(io.BytesIO(orig_bytes))
+                    if rot:
+                        img = img.rotate(rot, expand=True)
+                    if img.mode in ('RGBA', 'LA', 'P'):
+                        img = img.convert('RGB')
+                    buf = io.BytesIO()
+                    img.save(buf, format="JPEG", quality=85)
+                    d["photos"].insert(0, {
+                        "orig_name": file.name,
+                        "size":      len(orig_bytes),
+                        "team":      st.session_state.user_team,
+                        "uploader":  st.session_state.user_name,
+                        "data":      buf.getvalue(),
+                    })
+                    new_count += 1
                 except Exception:
-                    pass
-                d["photos"].insert(0, {
-                    "orig_name": file.name,
-                    "size":      len(img_bytes),
-                    "team":      st.session_state.user_team,
-                    "uploader":  st.session_state.user_name,
-                    "data":      img_bytes,
-                    "caption":   caption,
-                })
+                    st.warning(f"'{file.name}' 은 유효하지 않은 이미지입니다.")
+            if new_count > 0:
                 save_data(d)
-                new_count += 1
-            except Exception:
-                st.warning(f"'{file.name}' 은 유효하지 않은 이미지입니다.")
-        if new_count > 0:
-            st.success(f"✅ {new_count}장의 사진이 추가되었습니다!")
-            st.rerun()
+                st.session_state.photo_rotations = {}
+                st.success(f"✅ {new_count}장의 사진이 추가되었습니다!")
+                st.rerun()
 
     data = load_data()
     st.markdown(f'<div style="color:#888;font-size:0.9rem;margin:8px 0 16px;text-align:right;">총 {len(data["photos"])}장 업로드됨</div>', unsafe_allow_html=True)
@@ -1120,8 +1127,7 @@ with tab2:
             cols = st.columns(cols_per_row)
             for col, (idx, photo) in zip(cols, row):
                 with col:
-                    ai_cap = photo.get("caption", "")
-                    caption = f"{photo.get('team','')} 팀 {photo.get('uploader','')}{'  ' + ai_cap if ai_cap else ''}"
+                    caption = f"{photo.get('team','')} 팀 · {photo.get('uploader','')}"
                     st.image(Image.open(io.BytesIO(photo["data"])), use_container_width=True, caption=caption)
                     if photo.get("uploader") == st.session_state.user_name:
                         if st.button("🗑️ 삭제", key=f"del_my_photo_{idx}", use_container_width=True):
