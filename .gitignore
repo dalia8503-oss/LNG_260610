@@ -1,0 +1,9 @@
+.streamlit/secrets.toml
+__pycache__/
+*.pyc
+.env
+data.json
+photos/
+venv/
+*.pptx
+*.zip
