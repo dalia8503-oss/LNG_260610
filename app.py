@@ -100,11 +100,11 @@ def generate_ai_cheer(team: str, score_old: int, score_new: int, api_key: str) -
         f"지금 회사 체육행사 발야구 경기가 한창입니다.\n"
         f"현재 상황: {situation}\n"
         f"내 팀: {team} 팀\n\n"
-        f"{team} 팀을 응원하는 짧고 강렬한 응원 멘트를 딱 1개만 만들어 주세요.\n"
-        f"- 회사 동료들 사이의 유쾌하고 밝은 톤\n"
-        f"- 25자 이내\n"
-        f"- 이모지 1~2개 포함 (🔥⚾🏆💪🎉👏🙌😤💥🎊🥇 중에서 선택)\n"
-        f"- 멘트 텍스트만 출력 (설명·따옴표·번호 없이)"
+        f"{team} 팀을 응원하는 유쾌하고 텐션 높은 멘트를 딱 1개만 만들어줘.\n"
+        f"- 세기말 팀이면 레트로 감성, 새천년 팀이면 최신 밈(럭키비키 등)을 살짝 반영할 것\n"
+        f"- 25자 이내로 짧고 강렬하게\n"
+        f"- 이모지 1~2개 포함\n"
+        f"- 설명이나 따옴표 없이 멘트 텍스트만 출력"
     )
     resp = requests.post(
         "https://api.upstage.ai/v1/chat/completions",
