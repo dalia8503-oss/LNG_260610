@@ -343,12 +343,12 @@ if not st.session_state.user_name:
     st.markdown('<div class="join-title" style="font-size:clamp(1.2rem,4vw,2rem);margin-top:-8px;">⚾ 발야구 대결 ⚾</div>', unsafe_allow_html=True)
     st.markdown('<div class="join-sub">팀을 선택하고 이름을 입력해 입장하세요</div>', unsafe_allow_html=True)
 
-    # 팀 선택 버튼을 숨기고 카드 클릭으로 대체
-    st.markdown("""
-    <style>
-    div[data-testid="stButton"] { display:none !important; }
-    </style>
-    """, unsafe_allow_html=True)
+    # URL 파라미터로 팀 선택 처리
+    _tp = st.query_params.get('team_pick', '')
+    if _tp == 'old':
+        st.session_state.join_pick = '세기말'
+    elif _tp == 'new':
+        st.session_state.join_pick = '새천년'
 
     col_a, col_b = st.columns(2)
     with col_a:
@@ -405,15 +405,10 @@ body{{background:transparent;}}
 </div>
 <script>
 document.getElementById('c-old').addEventListener('click', function() {{
-  var p = window.parent || window;
-  var btns = p.document.querySelectorAll('button[data-testid="baseButton-secondary"]');
-  if (btns && btns[0]) btns[0].click();
+  (window.parent || window).location.href = '?team_pick=old';
 }});
 </script>
 """, height=200)
-        if st.button("_pick_old", key="pick_old"):
-            st.session_state.join_pick = "세기말"
-            st.rerun()
 
     with col_b:
         picked_old = st.session_state.join_pick == "세기말"
@@ -467,15 +462,10 @@ body{{background:transparent;}}
 </div>
 <script>
 document.getElementById('c-new').addEventListener('click', function() {{
-  var p = window.parent || window;
-  var btns = p.document.querySelectorAll('button[data-testid="baseButton-secondary"]');
-  if (btns && btns[1]) btns[1].click();
+  (window.parent || window).location.href = '?team_pick=new';
 }});
 </script>
 """, height=200)
-        if st.button("_pick_new", key="pick_new"):
-            st.session_state.join_pick = "새천년"
-            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.form("join_form"):
