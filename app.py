@@ -339,7 +339,7 @@ st.markdown("""
 if not st.session_state.user_name:
 
     st.markdown('<div class="join-wrap">', unsafe_allow_html=True)
-    st.markdown('<div class="join-title">LNG선공사팀 Cheer-up day</div>', unsafe_allow_html=True)
+    st.markdown('<div class="join-title"><span style="color:#00ccff;text-shadow:0 0 6px #00ccff,0 0 20px #00ccff,0 0 40px #00ccffaa;">LNG선공사팀</span><br><span style="font-size:clamp(1.4rem,5vw,2.4rem);color:#ff8800;text-shadow:0 0 6px #ff8800,0 0 20px #ff8800,0 0 40px #ff8800aa;">Cheer-up day</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="join-title" style="font-size:clamp(1.2rem,4vw,2rem);margin-top:-8px;">⚾ 발야구 대결 ⚾</div>', unsafe_allow_html=True)
     st.markdown('<div class="join-sub">팀을 선택하고 이름을 입력해 입장하세요</div>', unsafe_allow_html=True)
 
@@ -429,8 +429,12 @@ if st.session_state.user_team == "admin":
     st.markdown("""
     <div style="text-align:center; padding:12px 0 4px;">
       <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.6rem,5vw,2.8rem);
-                   color:#ffffff; text-shadow:0 0 20px rgba(255,255,255,0.4);">
-        LNG선공사팀 Cheer-up day
+                   color:#00ccff; text-shadow:0 0 6px #00ccff,0 0 20px #00ccff,0 0 40px #00ccffaa;">
+        LNG선공사팀
+      </span><br>
+      <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.4rem,4.5vw,2.4rem);
+                   color:#ff8800; text-shadow:0 0 6px #ff8800,0 0 20px #ff8800,0 0 40px #ff8800aa;">
+        Cheer-up day
       </span><br>
       <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1rem,3vw,1.8rem);
                    color:#ffffff; text-shadow:0 0 16px rgba(255,255,255,0.3);">
@@ -647,8 +651,12 @@ badge_color = "#33001a" if is_old else "#001a33"
 st.markdown(f"""
 <div style="text-align:center; padding: 12px 0 4px;">
   <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.6rem,5vw,2.8rem);
-               color:#ffffff; text-shadow:0 0 20px rgba(255,255,255,0.4);">
-    LNG선공사팀 Cheer-up day
+               color:#00ccff; text-shadow:0 0 6px #00ccff,0 0 20px #00ccff,0 0 40px #00ccffaa;">
+    LNG선공사팀
+  </span><br>
+  <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(1.4rem,4.5vw,2.4rem);
+               color:#ff8800; text-shadow:0 0 6px #ff8800,0 0 20px #ff8800,0 0 40px #ff8800aa;">
+    Cheer-up day
   </span><br>
   <span style="font-family:'Black Han Sans',sans-serif; font-size:clamp(0.9rem,2.5vw,1.5rem);
                color:#ffffff; text-shadow:0 0 14px rgba(255,255,255,0.3);">
