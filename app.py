@@ -325,6 +325,18 @@ st.markdown("""
 # ════════════════════════════════════════════════════════════
 if not st.session_state.user_name:
 
+    # localStorage에 저장된 로그인 정보가 있으면 자동 복원
+    components.html("""<script>
+    (function(){
+        var n=localStorage.getItem('lng_cheerup_name');
+        var t=localStorage.getItem('lng_cheerup_team');
+        var p=new URLSearchParams(window.parent.location.search);
+        if(n&&t&&!p.get('name')){
+            window.parent.location.replace('?name='+encodeURIComponent(n)+'&team='+encodeURIComponent(t));
+        }
+    })();
+    </script>""", height=0)
+
     st.markdown('<div class="join-wrap">', unsafe_allow_html=True)
     st.markdown('<div class="join-title"><span style="color:#00ccff;text-shadow:0 0 10px #00ccff99,0 0 28px #00ccff44;">LNG선공사팀</span><br><span style="font-size:clamp(1.4rem,5vw,2.4rem);color:#ff8800;text-shadow:0 0 10px #ff880099,0 0 28px #ff880044;">Cheer-up day</span></div>', unsafe_allow_html=True)
     st.markdown('<div class="join-title" style="font-size:clamp(1.2rem,4vw,2rem);margin-top:-8px;">⚾ 발야구 대결 ⚾</div>', unsafe_allow_html=True)
@@ -401,6 +413,13 @@ div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type di
                 st.session_state.user_team = st.session_state.join_pick
                 st.query_params["name"] = name_val
                 st.query_params["team"] = st.session_state.join_pick
+                _n64 = base64.b64encode(name_val.encode()).decode()
+                _t64 = base64.b64encode(st.session_state.join_pick.encode()).decode()
+                components.html(f"""<script>
+                function b64d(s){{return decodeURIComponent(atob(s).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));}}
+                localStorage.setItem('lng_cheerup_name',b64d('{_n64}'));
+                localStorage.setItem('lng_cheerup_team',b64d('{_t64}'));
+                </script>""", height=0)
                 st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -436,6 +455,10 @@ if st.session_state.user_team == "admin":
     _, col_adm_exit = st.columns([9, 1])
     with col_adm_exit:
         if st.button("퇴장", key="admin_exit"):
+            components.html("""<script>
+            localStorage.removeItem('lng_cheerup_name');
+            localStorage.removeItem('lng_cheerup_team');
+            </script>""", height=0)
             st.session_state.user_name = ""
             st.session_state.user_team = ""
             st.query_params.clear()
@@ -676,6 +699,10 @@ st.markdown(f"""
 _, col_exit = st.columns([8, 1])
 with col_exit:
     if st.button("퇴장", key="exit_btn"):
+        components.html("""<script>
+        localStorage.removeItem('lng_cheerup_name');
+        localStorage.removeItem('lng_cheerup_team');
+        </script>""", height=0)
         st.session_state.user_name = ""
         st.session_state.user_team = ""
         st.session_state.join_pick = ""
@@ -1166,31 +1193,38 @@ with tab2:
         st.markdown('<div style="text-align:center;color:#555;padding:48px 20px;font-size:1rem;border:2px dashed #333;border-radius:16px;">📷 아직 업로드된 사진이 없습니다.<br>위 버튼을 눌러 현장 사진을 공유해 주세요!</div>', unsafe_allow_html=True)
 
 # ── TAB 3: 3행시 이벤트 ──────────────────────────────────────
-HAIKU_WORDS = {"세기말": ["세", "기", "말"], "새천년": ["새", "천", "년"]}
+HAIKU_WORDS = {"세기말": ["세", "기", "말"], "새천년": ["새", "천", "년"], "발야구": ["발", "야", "구"]}
+HAIKU_VALID = {  # 각 줄에서 허용하는 첫 글자 목록
+    "세기말": [["세"], ["기"], ["말"]],
+    "새천년": [["새"], ["천"], ["년", "연"]],
+    "발야구": [["발"], ["야"], ["구"]],
+}
 
 with tab3:
     st.markdown("""<div style="text-align:center;font-family:'Black Han Sans',sans-serif;
         font-size:clamp(1.2rem,3.5vw,1.8rem);color:#ff88cc;
         text-shadow:0 0 10px #ff88cc88;margin-bottom:6px;">💝 3행시 이벤트</div>
     <div style="text-align:center;color:#aaa;font-size:0.9rem;margin-bottom:20px;">
-        '세기말' 또는 '새천년'으로 3행시를 짓고 하트를 받으세요!<br>
+        '세기말' · '새천년' · '발야구' 중 하나로 3행시를 짓고 하트를 받으세요!<br>
         ❤️ 가장 많은 하트를 받은 분께 <b style="color:#ffcc44;">선물</b>을 드립니다 🎁
     </div>""", unsafe_allow_html=True)
 
     # ── 작성 폼 ──
     with st.expander("✏️ 3행시 짓기", expanded=True):
-        hw = st.radio("주제 선택", ["세기말", "새천년"], key="haiku_word_radio", horizontal=True)
+        hw = st.radio("주제 선택", ["세기말", "새천년", "발야구"], key="haiku_word_radio", horizontal=True)
         syls = HAIKU_WORDS[hw]
-        wc = "#ff8844" if hw == "세기말" else "#44ccff"
-        st.markdown(f'<div style="color:{wc};font-size:0.85rem;margin:4px 0 8px;">각 줄의 첫 글자: <b>{syls[0]}</b> · <b>{syls[1]}</b> · <b>{syls[2]}</b></div>', unsafe_allow_html=True)
-        hl1 = st.text_input(f"{syls[0]} —", placeholder=f"'{syls[0]}'(으)로 시작하는 첫 번째 줄", key="haiku_l1")
-        hl2 = st.text_input(f"{syls[1]} —", placeholder=f"'{syls[1]}'(으)로 시작하는 두 번째 줄", key="haiku_l2")
-        hl3 = st.text_input(f"{syls[2]} —", placeholder=f"'{syls[2]}'(으)로 시작하는 세 번째 줄", key="haiku_l3")
+        valid = HAIKU_VALID[hw]
+        wc = "#ff8844" if hw == "세기말" else ("#88ee55" if hw == "발야구" else "#44ccff")
+        hint_syls = ["/".join(v) for v in valid]
+        st.markdown(f'<div style="color:{wc};font-size:0.85rem;margin:4px 0 8px;">각 줄의 첫 글자: <b>{hint_syls[0]}</b> · <b>{hint_syls[1]}</b> · <b>{hint_syls[2]}</b></div>', unsafe_allow_html=True)
+        hl1 = st.text_input(f"{hint_syls[0]} —", placeholder=f"'{hint_syls[0]}'(으)로 시작하는 첫 번째 줄", key="haiku_l1")
+        hl2 = st.text_input(f"{hint_syls[1]} —", placeholder=f"'{hint_syls[1]}'(으)로 시작하는 두 번째 줄", key="haiku_l2")
+        hl3 = st.text_input(f"{hint_syls[2]} —", placeholder=f"'{hint_syls[2]}'(으)로 시작하는 세 번째 줄", key="haiku_l3")
         if st.button("💌 3행시 등록", use_container_width=True, type="primary", key="haiku_submit"):
             _errs = []
-            for _line, _syl, _n in [(hl1.strip(), syls[0], "첫"), (hl2.strip(), syls[1], "두"), (hl3.strip(), syls[2], "세")]:
-                if not _line or not _line.startswith(_syl):
-                    _errs.append(f"{_n} 번째 줄은 **'{_syl}'** 으로 시작해야 합니다.")
+            for _line, _vlist, _hint, _n in [(hl1.strip(), valid[0], hint_syls[0], "첫"), (hl2.strip(), valid[1], hint_syls[1], "두"), (hl3.strip(), valid[2], hint_syls[2], "세")]:
+                if not _line or not any(_line.startswith(s) for s in _vlist):
+                    _errs.append(f"{_n} 번째 줄은 **'{_hint}'** 으로 시작해야 합니다.")
             if _errs:
                 for _e in _errs:
                     st.error(_e)
@@ -1219,16 +1253,17 @@ with tab3:
     else:
         st.markdown(f'<div style="color:#888;font-size:0.9rem;margin:12px 0 8px;text-align:right;">총 {len(_hlist)}편 등록됨</div>', unsafe_allow_html=True)
         for _h in _hlist:
-            _syls_h = HAIKU_WORDS[_h["word"]]
             _tc = "#ff4499" if _h["team"] == "세기말" else "#66ccff"
-            _wc2 = "#ff8844" if _h["word"] == "세기말" else "#44ccff"
+            _wc2 = "#ff8844" if _h["word"] == "세기말" else ("#88ee55" if _h["word"] == "발야구" else "#44ccff")
             _badge = "cheer-badge-old" if _h["team"] == "세기말" else "cheer-badge-new"
             _liked = st.session_state.user_name in _h.get("liked_by", [])
             _is_mine = _h["name"] == st.session_state.user_name
             _heart = "❤️" if _liked else "🤍"
             _c_card, _c_like = st.columns([5, 1])
             with _c_card:
-                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 18px;border-left:4px solid {_tc};margin-bottom:4px;"><div style="margin-bottom:8px;"><span class="{_badge}">{_h["team"]} 팀</span>&nbsp;<b style="color:#fff;">{_h["name"]}</b>&nbsp;<span style="color:{_wc2};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span></div><div style="line-height:2.1;font-size:1rem;color:#eee;"><b style="color:{_wc2};">{_syls_h[0]}</b>{_h["lines"][0][len(_syls_h[0]):]}<br><b style="color:{_wc2};">{_syls_h[1]}</b>{_h["lines"][1][len(_syls_h[1]):]}<br><b style="color:{_wc2};">{_syls_h[2]}</b>{_h["lines"][2][len(_syls_h[2]):]}</div></div>', unsafe_allow_html=True)
+                # 첫 글자 강조: 실제 입력된 첫 글자(1글자) 기준
+                _lines_html = "<br>".join(f'<b style="color:{_wc2};">{ln[0]}</b>{ln[1:]}' for ln in _h["lines"])
+                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 18px;border-left:4px solid {_tc};margin-bottom:4px;"><div style="margin-bottom:8px;"><span class="{_badge}">{_h["team"]} 팀</span>&nbsp;<b style="color:#fff;">{_h["name"]}</b>&nbsp;<span style="color:{_wc2};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span></div><div style="line-height:2.1;font-size:1rem;color:#eee;">{_lines_html}</div></div>', unsafe_allow_html=True)
             with _c_like:
                 st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
                 _tip = "내 작품엔 좋아요 불가" if _is_mine else ("이미 좋아요 ❤️" if _liked else "좋아요!")
