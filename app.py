@@ -823,7 +823,13 @@ if _bdata.get("broadcast"):
     ov.appendChild(hint);
     doc2.body.appendChild(ov);
 
-    ov.addEventListener('click', cleanup);
+    var _bDismiss = function() {{
+        doc2.removeEventListener('click',      _bDismiss, true);
+        doc2.removeEventListener('touchstart', _bDismiss, true);
+        cleanup();
+    }};
+    doc2.addEventListener('click',      _bDismiss, true);
+    doc2.addEventListener('touchstart', _bDismiss, true);
     ov.addEventListener('animationend', cleanup);
 
     // 효과음: 공지 → 띵동, 팀응원 → 팡파레
