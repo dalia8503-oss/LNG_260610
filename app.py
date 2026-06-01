@@ -1222,11 +1222,12 @@ with tab3:
             _liked = st.session_state.user_name in _h.get("liked_by", [])
             _is_mine = _h["name"] == st.session_state.user_name
             _heart = "❤️" if _liked else "🤍"
+            _display_name = "✏️ 내 작품" if _is_mine else ""
             _c_card, _c_like = st.columns([5, 1])
             with _c_card:
-                # 첫 글자 강조: 실제 입력된 첫 글자(1글자) 기준
                 _lines_html = "<br>".join(f'<b style="color:{_wc2};">{ln[0]}</b>{ln[1:]}' for ln in _h["lines"])
-                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 18px;border-left:4px solid {_tc};margin-bottom:4px;"><div style="margin-bottom:8px;"><span class="{_badge}">{_h["team"]} 팀</span>&nbsp;<b style="color:#fff;">{_h["name"]}</b>&nbsp;<span style="color:{_wc2};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span></div><div style="line-height:2.1;font-size:1rem;color:#eee;">{_lines_html}</div></div>', unsafe_allow_html=True)
+                _name_html = f'&nbsp;<span style="color:#aaa;font-size:0.82rem;">{_display_name}</span>' if _display_name else ""
+                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:14px;padding:14px 18px;border-left:4px solid {_tc};margin-bottom:4px;"><div style="margin-bottom:8px;"><span class="{_badge}">{_h["team"]} 팀</span>{_name_html}&nbsp;<span style="color:{_wc2};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span></div><div style="line-height:2.1;font-size:1rem;color:#eee;">{_lines_html}</div></div>', unsafe_allow_html=True)
             with _c_like:
                 st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
                 _tip = "내 작품엔 좋아요 불가" if _is_mine else ("이미 좋아요 ❤️" if _liked else "좋아요!")
