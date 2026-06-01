@@ -776,48 +776,48 @@ html,body{{width:100%;height:100%;overflow:hidden;background:transparent}}
     var bid='{_bc_id}', keyDone='bc_done_'+bid;
     var s=null; try{{s=sessionStorage}}catch(e){{}}
 
-    // iframe을 상단 고정 배너로 위치시키기
+    // iframe pointer-events 활성화 (window.frameElement)
     var fr=null;
     try{{fr=window.frameElement}}catch(e){{}}
     if(fr){{
-        fr.style.cssText='position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:70px!important;z-index:99999!important;border:none!important;pointer-events:auto!important;';
-        // parent.head에도 !important CSS 주입 (Streamlit 재렌더링 대비)
-        try{{
-            if(!parent.document.getElementById('bc_fs_'+bid)){{
-                var el=parent.document.createElement('style');
-                el.id='bc_fs_'+bid;
-                el.textContent='iframe[data-bcid="'+bid+'"]{{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:70px!important;z-index:99999!important;border:none!important;pointer-events:auto!important;}}';
-                parent.document.head.appendChild(el);
-            }}
-            fr.setAttribute('data-bcid',bid);
-        }}catch(e){{}}
+        fr.style.setProperty('position','fixed','important');
+        fr.style.setProperty('top','0','important');
+        fr.style.setProperty('left','0','important');
+        fr.style.setProperty('width','100vw','important');
+        fr.style.setProperty('height','70px','important');
+        fr.style.setProperty('z-index','99999','important');
+        fr.style.setProperty('border','none','important');
+        fr.style.setProperty('pointer-events','auto','important');
     }}
 
     // 이미 닫힌 경우 즉시 숨김
     if(s&&s.getItem(keyDone)){{
-        document.getElementById('banner').style.display='none';
-        if(fr)fr.style.cssText='height:0!important;border:none!important;pointer-events:none!important;';
+        document.documentElement.style.display='none';
+        if(fr){{fr.style.setProperty('display','none','important');fr.style.setProperty('height','0','important');}}
         return;
     }}
 
     var dismissed=false;
-    var dismiss=function(){{
+    var dismiss=function(e){{
+        if(e){{try{{e.preventDefault();e.stopPropagation();}}catch(_){{}}}}
         if(dismissed)return; dismissed=true;
         if(s)s.setItem(keyDone,'1');
-        var b=document.getElementById('banner');
-        b.style.animation='none'; b.style.transform='translateY(-100%)'; b.style.transition='transform .25s ease';
+        document.documentElement.style.opacity='0';
+        document.documentElement.style.transition='opacity .2s';
         setTimeout(function(){{
-            b.style.display='none';
+            document.documentElement.style.display='none';
             if(fr){{
-                fr.style.cssText='height:0!important;border:none!important;pointer-events:none!important;';
-                try{{var el=parent.document.getElementById('bc_fs_'+bid);if(el)el.parentNode.removeChild(el);}}catch(e){{}}
+                fr.style.setProperty('display','none','important');
+                fr.style.setProperty('height','0','important');
             }}
-        }},260);
+        }},200);
     }};
 
-    document.getElementById('banner').addEventListener('click',dismiss);
-    document.getElementById('banner').addEventListener('touchstart',function(e){{e.preventDefault();dismiss();}},{{passive:false}});
-    setTimeout(dismiss,5000);  // 5초 자동 닫기
+    // document 레벨 캡처 이벤트 — 어디를 탭해도 잡힘
+    document.addEventListener('click',    dismiss, true);
+    document.addEventListener('touchend', dismiss, {{capture:true, passive:false}});
+    document.addEventListener('pointerup',dismiss, true);
+    setTimeout(dismiss, 3000);  // 3초 자동 닫기
 
     // 효과음
     try{{
