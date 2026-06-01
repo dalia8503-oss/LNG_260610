@@ -7,6 +7,8 @@ import copy
 import threading
 import time
 import requests
+import subprocess
+import datetime
 from PIL import Image
 import io
 import zipfile
@@ -1214,4 +1216,16 @@ with tab3:
                     save_data(_ld)
                     st.rerun()
 
-st.markdown('<div style="text-align:center;color:#444;font-size:0.8rem;margin-top:48px;padding-bottom:16px;">⚾ LNG선공사팀 발야구 대회 | 세기말 vs 새천년 ⚾</div>', unsafe_allow_html=True)
+try:
+    _git_sha = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL
+    ).decode().strip()
+except Exception:
+    _git_sha = "unknown"
+_deploy_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M KST")
+st.markdown(
+    f'<div style="text-align:center;color:#444;font-size:0.75rem;margin-top:48px;padding-bottom:16px;">'
+    f'⚾ LNG선공사팀 발야구 대회 | 세기말 vs 새천년 ⚾'
+    f'<br><span style="color:#333;">build {_git_sha} · {_deploy_time}</span></div>',
+    unsafe_allow_html=True,
+)
