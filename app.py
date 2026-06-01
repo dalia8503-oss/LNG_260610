@@ -746,139 +746,128 @@ if _bdata.get("broadcast"):
     _bc_bg     = "linear-gradient(135deg,#33001a,#660033)" if _bc_team == "세기말" else ("linear-gradient(135deg,#332200,#554400)" if _bc_team == "공지" else "linear-gradient(135deg,#001a33,#003366)")
     _bc_label  = "📢 공지" if _bc_team == "공지" else f"{_bc_team} 팀 · {_bc.get('name','')}"
     components.html(f"""
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+html,body{{width:100%;height:100%;background:transparent;overflow:hidden}}
+@keyframes bshow{{0%{{opacity:0;transform:scale(.88)}}12%{{opacity:1;transform:scale(1)}}82%{{opacity:1;transform:scale(1)}}100%{{opacity:0;transform:scale(.95)}}}}
+@keyframes bpulse{{0%,100%{{transform:scale(1)}}50%{{transform:scale(1.04)}}}}
+#bov{{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:{_bc_bg};
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;user-select:none;-webkit-user-select:none;
+    animation:bshow 8s ease-in-out 1 forwards;
+    font-family:'Noto Sans KR',sans-serif;
+}}
+#badge{{
+    color:#fff;border:3px solid {_bc_color};border-radius:10px;
+    padding:8px 28px;font-size:clamp(1rem,3.5vw,2rem);font-weight:900;
+    margin-bottom:36px;background:rgba(0,0,0,.4);letter-spacing:2px;
+    box-shadow:0 0 12px {_bc_color},0 0 28px {_bc_color};text-shadow:0 0 6px #fff;
+}}
+#msg{{
+    color:#fff;font-size:clamp(2rem,8vw,5.5rem);font-weight:700;
+    letter-spacing:4px;text-align:center;padding:0 40px;line-height:1.3;
+    text-shadow:0 0 4px #fff,0 0 20px {_bc_color},0 0 60px {_bc_color};
+    animation:bpulse 1.6s ease-in-out infinite;
+}}
+#hint{{
+    position:absolute;bottom:40px;
+    color:rgba(255,255,255,.45);font-size:clamp(.75rem,2.5vw,1rem);letter-spacing:1px;
+}}
+</style>
+<div id="bov">
+    <div id="badge">{_bc_label}</div>
+    <div id="msg">{_bc_msg}</div>
+    <div id="hint">화면을 터치하면 닫힙니다</div>
+</div>
 <script>
 (function() {{
-    var bid      = '{_bc_id}';
-    var keyShown = 'bcast_'      + bid;
-    var keyDone  = 'bcast_done_' + bid;
-    var keyTime  = 'bcast_t_'    + bid;
+    var bid     = '{_bc_id}';
+    var keyDone = 'bcast_done_' + bid;
+    var keyShown= 'bcast_shown_' + bid;
 
     var s = null;
     try {{ s = parent.sessionStorage; }} catch(e) {{}}
     if (!s) {{ try {{ s = sessionStorage; }} catch(e) {{}} }}
 
-    var doc2 = null;
-    try {{ doc2 = parent.document; }} catch(e) {{}}
-    if (!doc2) doc2 = document;
+    // iframe 자체를 full-screen으로
+    var fr = null;
+    try {{ fr = window.frameElement; }} catch(e) {{}}
+    if (!fr) {{
+        try {{
+            var flist = parent.document.querySelectorAll('iframe');
+            for (var i=0;i<flist.length;i++) {{
+                try {{ if (flist[i].contentWindow===window){{fr=flist[i];break;}} }} catch(e){{}}
+            }}
+        }} catch(e) {{}}
+    }}
 
-    if (s && s.getItem(keyDone)) return;
+    var bov = document.getElementById('bov');
 
+    var collapse = function() {{
+        bov.style.display = 'none';
+        if (fr) fr.style.cssText = 'height:0px!important;border:none!important;pointer-events:none!important;';
+    }};
+
+    // 이미 닫은 경우
+    if (s && s.getItem(keyDone)) {{ collapse(); return; }}
+
+    // 같은 bid의 다른 iframe이 이미 띄웠으면 이 iframe은 숨김
+    if (s && s.getItem(keyShown)) {{ collapse(); return; }}
+    if (s) s.setItem(keyShown, '1');
+
+    // full-screen 적용
+    if (fr) {{
+        fr.style.cssText = 'position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;z-index:99999!important;border:none!important;pointer-events:auto!important;background:transparent!important;';
+    }}
+
+    var done = false;
     var cleanup = function() {{
-        if (s && s.getItem(keyDone)) return;
+        if (done) return;
+        done = true;
         if (s) s.setItem(keyDone, '1');
-        var el  = doc2.getElementById('bov_' + bid);
-        if (el  && el.parentNode)  el.parentNode.removeChild(el);
-        var sel = doc2.getElementById('bst_' + bid);
-        if (sel && sel.parentNode) sel.parentNode.removeChild(sel);
-        var tabs = doc2.querySelectorAll('button[data-baseweb="tab"]');
-        if (tabs && tabs.length > 0) tabs[0].click();
+        collapse();
     }};
 
-    if (s && s.getItem(keyShown)) {{
-        var t = parseInt(s.getItem(keyTime) || '0');
-        if (t && Date.now() - t >= 8500) {{ cleanup(); }}
-        return;
-    }}
+    bov.addEventListener('click', cleanup);
+    bov.addEventListener('touchstart', function(e) {{ e.preventDefault(); cleanup(); }}, {{passive:false}});
+    bov.addEventListener('animationend', cleanup);
 
-    if (s) {{
-        s.setItem(keyShown, '1');
-        s.setItem(keyTime, Date.now().toString());
-    }}
-    if (doc2.getElementById('bov_' + bid)) return;
-
-    var stEl = doc2.createElement('style');
-    stEl.id = 'bst_' + bid;
-    stEl.textContent =
-        '@keyframes bshow_' + bid + ' {{ 0% {{ opacity:0;transform:scale(0.88); }} 12% {{ opacity:1;transform:scale(1); }} 82% {{ opacity:1;transform:scale(1); }} 100% {{ opacity:0;transform:scale(0.95); }} }}' +
-        '@keyframes bpulse_' + bid + ' {{ 0%,100% {{ transform:scale(1); }} 50% {{ transform:scale(1.04); }} }}';
-    doc2.head.appendChild(stEl);
-
-    var ov = doc2.createElement('div');
-    ov.id = 'bov_' + bid;
-    ov.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;';
-    ov.style.background = '{_bc_bg}';
-    ov.style.animation  = 'bshow_' + bid + ' 8s ease-in-out 1 forwards';
-
-    var badge = doc2.createElement('div');
-    badge.textContent = '{_bc_label}';
-    badge.style.cssText = 'color:#fff;border:3px solid {_bc_color};border-radius:10px;padding:8px 28px;font-size:clamp(1rem,3.5vw,2rem);font-weight:900;margin-bottom:36px;background:rgba(0,0,0,0.4);letter-spacing:2px;';
-    badge.style.fontFamily = "'Noto Sans KR', sans-serif";
-    badge.style.boxShadow  = '0 0 12px {_bc_color}, 0 0 28px {_bc_color}';
-    badge.style.textShadow = '0 0 6px #fff';
-
-    var msg = doc2.createElement('div');
-    msg.textContent = '{_bc_msg}';
-    msg.style.cssText = 'color:#fff;font-size:clamp(2rem,8vw,5.5rem);font-weight:700;letter-spacing:4px;text-align:center;padding:0 40px;line-height:1.3;';
-    msg.style.fontFamily = "'Noto Sans KR', sans-serif";
-    msg.style.textShadow = '0 0 4px #fff, 0 0 20px {_bc_color}, 0 0 60px {_bc_color}';
-    msg.style.animation  = 'bpulse_' + bid + ' 1.6s ease-in-out infinite';
-
-    var hint = doc2.createElement('div');
-    hint.textContent = '화면을 터치하면 닫힙니다';
-    hint.style.cssText = 'position:absolute;bottom:40px;color:rgba(255,255,255,0.45);font-size:clamp(0.75rem,2.5vw,1rem);letter-spacing:1px;';
-    hint.style.fontFamily = "'Noto Sans KR', sans-serif";
-
-    ov.appendChild(badge);
-    ov.appendChild(msg);
-    ov.appendChild(hint);
-    doc2.body.appendChild(ov);
-
-    var _bDismiss = function() {{
-        doc2.removeEventListener('click',      _bDismiss, true);
-        doc2.removeEventListener('touchstart', _bDismiss, true);
-        cleanup();
-    }};
-    doc2.addEventListener('click',      _bDismiss, true);
-    doc2.addEventListener('touchstart', _bDismiss, true);
-    ov.addEventListener('animationend', cleanup);
-
-    // 효과음: 공지 → 띵동, 팀응원 → 팡파레
+    // 효과음
     (function() {{
         try {{
-            var AC = null;
-            try {{ AC = parent.AudioContext || parent.webkitAudioContext; }} catch(e) {{}}
-            if (!AC) AC = window.AudioContext || window.webkitAudioContext;
+            var AC = window.AudioContext || window.webkitAudioContext;
             if (!AC) return;
             var actx = new AC();
             var bcTeam = '{_bc_team}';
             var playBell = function(freq, t0, dur, vol) {{
                 var osc = actx.createOscillator();
                 var gain = actx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = freq;
+                osc.type = 'sine'; osc.frequency.value = freq;
                 gain.gain.setValueAtTime(0.001, t0);
-                gain.gain.linearRampToValueAtTime(vol, t0 + 0.01);
-                gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+                gain.gain.linearRampToValueAtTime(vol, t0+0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, t0+dur);
                 osc.connect(gain); gain.connect(actx.destination);
-                osc.start(t0); osc.stop(t0 + dur + 0.05);
+                osc.start(t0); osc.stop(t0+dur+0.05);
             }};
             var play = function() {{
                 if (bcTeam === '공지') {{
-                    playBell(880, actx.currentTime + 0.0,  1.2, 0.4);
-                    playBell(587, actx.currentTime + 0.45, 1.0, 0.35);
+                    playBell(880, actx.currentTime+0.0,  1.2, 0.4);
+                    playBell(587, actx.currentTime+0.45, 1.0, 0.35);
                 }} else {{
-                    var notes = [
-                        [523.25, 0.00, 0.20],
-                        [659.25, 0.22, 0.20],
-                        [784.00, 0.44, 0.20],
-                        [1046.5, 0.66, 1.00],
-                    ];
-                    notes.forEach(function(n) {{
-                        var osc  = actx.createOscillator();
-                        var gain = actx.createGain();
-                        var t0   = actx.currentTime + n[1];
-                        osc.type = 'triangle';
-                        osc.frequency.value = n[0];
-                        gain.gain.setValueAtTime(0.001, t0);
-                        gain.gain.linearRampToValueAtTime(0.35, t0 + 0.03);
-                        gain.gain.exponentialRampToValueAtTime(0.001, t0 + n[2]);
+                    [[523.25,0.00,0.20],[659.25,0.22,0.20],[784.00,0.44,0.20],[1046.5,0.66,1.00]].forEach(function(n) {{
+                        var osc=actx.createOscillator(), gain=actx.createGain(), t0=actx.currentTime+n[1];
+                        osc.type='triangle'; osc.frequency.value=n[0];
+                        gain.gain.setValueAtTime(0.001,t0);
+                        gain.gain.linearRampToValueAtTime(0.35,t0+0.03);
+                        gain.gain.exponentialRampToValueAtTime(0.001,t0+n[2]);
                         osc.connect(gain); gain.connect(actx.destination);
-                        osc.start(t0); osc.stop(t0 + n[2] + 0.05);
+                        osc.start(t0); osc.stop(t0+n[2]+0.05);
                     }});
                 }}
             }};
-            if (actx.state === 'suspended') {{ actx.resume().then(play); }}
-            else {{ play(); }}
+            if (actx.state==='suspended') {{ actx.resume().then(play); }} else {{ play(); }}
         }} catch(e) {{}}
     }})();
 }})();
