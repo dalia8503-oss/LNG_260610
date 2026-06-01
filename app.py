@@ -83,10 +83,36 @@ if not st.session_state.user_name:
         st.session_state.user_team = _qp_team
 
 MISSIONS = [
-    "🟣 짐볼 찬스!",
-    "🌊 모세의 기적!",
-    "💧 물병 세우고 달리기!",
-    "📸 단체 포즈 미션!",
+    {
+        "name": "🟣 짐볼 찬스!",
+        "tag":  "예능 1순위",
+        "desc": "둥근 공 대신 크고 통통 튀는 짐볼로 타격!\n발이 묻혀버리는 어마어마한 크기",
+        "hint": "헛발질 유발 1순위 — 수비도 멘붕",
+    },
+    {
+        "name": "🌊 모세의 기적!",
+        "tag":  "무조건 1루 진루",
+        "desc": "공을 찰 때 수비수 전원이 3초간 바닥에 엎드려야 함!",
+        "hint": "합법적 무사 진루 — 수비팀 굴욕",
+    },
+    {
+        "name": "🐧 황제 펭귄 찬스!",
+        "tag":  "역전의 기회",
+        "desc": "지고 있는 팀에게만 발동!\n공 두 개를 동시에 차는 기회",
+        "hint": "수비 혼란 보장 — 어느 공을 막아야 해?",
+    },
+    {
+        "name": "💣 박격포 찬스!",
+        "tag":  "파괴력 최강",
+        "desc": "공을 손으로 든 채 허공으로 뻥 차올려\n아찔한 포물선을 그리는 찬스!",
+        "hint": "타격감 최강 — 설명이 필요 없는 그 이름",
+    },
+    {
+        "name": "💥 상대편 오발탄 찬스!",
+        "tag":  "반전 발차기",
+        "desc": "평소 안 쓰는 발로 차야 하는 찬스!\n오른발잡이라면 왼발로",
+        "hint": "어색해서 더 웃긴 — 예측 불가 궤적",
+    },
 ]
 
 
@@ -486,7 +512,8 @@ if st.session_state.user_team == "admin":
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("**현재 미션**")
         if data["mission"]:
-            st.markdown(f'<div class="mission-box" style="padding:16px 24px;"><div class="mission-text" style="font-size:clamp(1.4rem,4vw,2.4rem);">{data["mission"]}</div></div>', unsafe_allow_html=True)
+            _om = data["mission"] if isinstance(data["mission"], dict) else {"name": data["mission"], "tag": ""}
+            st.markdown(f'<div class="mission-box" style="padding:16px 24px;"><div style="color:#ffdd00;font-size:0.8rem;font-weight:700;letter-spacing:2px;margin-bottom:8px;">{_om["tag"]}</div><div class="mission-text" style="font-size:clamp(1.4rem,4vw,2.4rem);">{_om["name"]}</div></div>', unsafe_allow_html=True)
         else:
             st.info("현재 발동된 미션 없음")
 
@@ -539,24 +566,20 @@ if st.session_state.user_team == "admin":
 
         st.markdown("<hr>", unsafe_allow_html=True)
         st.markdown("#### 🎲 미션 제어")
-        _m1, _m2 = st.columns(2)
-        _m3, _m4 = st.columns(2)
-        for _col, _mission_btn, _btn_key in [
-            (_m1, MISSIONS[0], "adm_m0"),
-            (_m2, MISSIONS[1], "adm_m1"),
-            (_m3, MISSIONS[2], "adm_m2"),
-            (_m4, MISSIONS[3], "adm_m3"),
-        ]:
+        _mr1 = st.columns(3)
+        _mr2 = st.columns(2)
+        for _i, (_col, _m) in enumerate(zip(_mr1 + _mr2, MISSIONS)):
             with _col:
-                if st.button(_mission_btn, key=_btn_key, use_container_width=True):
+                if st.button(_m["name"], key=f"adm_m{_i}", use_container_width=True, help=_m["desc"]):
                     d = load_data()
-                    d["mission"] = _mission_btn
-                    d["mission_flash"] = {"mission": _mission_btn, "mid": hashlib.md5(str(random.random()).encode()).hexdigest()[:8], "expires": time.time() + 11}
+                    d["mission"] = _m
+                    d["mission_flash"] = {"mission": _m["name"], "mid": hashlib.md5(str(random.random()).encode()).hexdigest()[:8], "expires": time.time() + 11}
                     save_data(d)
                     st.balloons(); st.rerun()
         data = load_data()
         if data["mission"]:
-            st.markdown(f'<div class="mission-box" style="padding:20px;"><div class="mission-text" style="font-size:clamp(1.4rem,4vw,2.4rem);">{data["mission"]}</div></div>', unsafe_allow_html=True)
+            _cm = data["mission"] if isinstance(data["mission"], dict) else {"name": data["mission"], "tag": ""}
+            st.markdown(f'<div class="mission-box" style="padding:20px;"><div style="color:#ffdd00;font-size:0.8rem;font-weight:700;letter-spacing:2px;margin-bottom:8px;">{_cm["tag"]}</div><div class="mission-text" style="font-size:clamp(1.4rem,4vw,2.4rem);">{_cm["name"]}</div></div>', unsafe_allow_html=True)
         _, col_adm_mc, _ = st.columns([3, 2, 3])
         with col_adm_mc:
             if st.button("❌ 미션 초기화", key="adm_mission_clr", use_container_width=True):
@@ -991,7 +1014,15 @@ with tab1:
 
     data = load_data()
     if data["mission"]:
-        st.markdown(f'<div class="mission-box"><div style="color:#cc99ff;font-size:0.9rem;margin-bottom:8px;letter-spacing:3px;">✨ 미션 발동 ✨</div><div class="mission-text">{data["mission"]}</div></div>', unsafe_allow_html=True)
+        _um = data["mission"] if isinstance(data["mission"], dict) else {"name": data["mission"], "tag": "", "desc": "", "hint": ""}
+        _um_desc = _um.get("desc", "").replace("\n", "<br>")
+        st.markdown(f'''<div class="mission-box">
+  <div style="color:#cc99ff;font-size:0.9rem;margin-bottom:12px;letter-spacing:3px;">✨ 미션 발동 ✨</div>
+  <div style="color:#ffdd00;font-size:0.85rem;font-weight:700;letter-spacing:2px;margin-bottom:14px;background:rgba(255,221,0,0.15);padding:4px 18px;border-radius:20px;display:inline-block;">{_um["tag"]}</div>
+  <div class="mission-text">{_um["name"]}</div>
+  <div style="color:#e0d0ff;font-size:clamp(0.9rem,2.5vw,1.1rem);margin-top:16px;line-height:1.7;">{_um_desc}</div>
+  <div style="color:#cc99ff;font-size:0.9rem;margin-top:14px;font-style:italic;">💡 {_um.get("hint","")}</div>
+</div>''', unsafe_allow_html=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
