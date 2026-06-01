@@ -362,7 +362,7 @@ if not st.session_state.user_name:
             window.parent.location.replace('?name='+encodeURIComponent(n)+'&team='+encodeURIComponent(t));
         }
     })();
-    </script>""", height=0)
+    </script>""", height=1)
 
     st.markdown('<div class="join-wrap">', unsafe_allow_html=True)
     st.markdown('<div class="join-title"><span style="color:#00ccff;text-shadow:0 0 10px #00ccff99,0 0 28px #00ccff44;">LNG선공사팀</span><br><span style="font-size:clamp(1.4rem,5vw,2.4rem);color:#ff8800;text-shadow:0 0 10px #ff880099,0 0 28px #ff880044;">Cheer-up day</span></div>', unsafe_allow_html=True)
@@ -446,7 +446,7 @@ div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type di
                 function b64d(s){{return decodeURIComponent(atob(s).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));}}
                 localStorage.setItem('lng_cheerup_name',b64d('{_n64}'));
                 localStorage.setItem('lng_cheerup_team',b64d('{_t64}'));
-                </script>""", height=0)
+                </script>""", height=1)
                 st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -485,7 +485,7 @@ if st.session_state.user_team == "admin":
             st.iframe("""<script>
             localStorage.removeItem('lng_cheerup_name');
             localStorage.removeItem('lng_cheerup_team');
-            </script>""", height=0)
+            </script>""", height=1)
             st.session_state.user_name = ""
             st.session_state.user_team = ""
             st.query_params.clear()
@@ -726,7 +726,7 @@ with col_exit:
         st.iframe("""<script>
         localStorage.removeItem('lng_cheerup_name');
         localStorage.removeItem('lng_cheerup_team');
-        </script>""", height=0)
+        </script>""", height=1)
         st.session_state.user_name = ""
         st.session_state.user_team = ""
         st.session_state.join_pick = ""
@@ -777,7 +777,7 @@ if _bdata.get("broadcast"):
         if(ax.state==='suspended')ax.resume().then(play);else play();
     }}catch(e){{}}
 }})();
-</script>""", height=0)
+</script>""", height=1)
 
 # ── 깜짝 미션 전체화면 오버레이 ──────────────────────────────
 if _bdata.get("mission_flash"):
@@ -900,7 +900,7 @@ if _bdata.get("mission_flash"):
     }})();
 }})();
 </script>
-""", height=0)
+""", height=1)
 
 tab1, tab2, tab3 = st.tabs(["🏟️ 전광판 & 미션", "📸 현장 르포 사진방", "💝 3행시 이벤트"])
 
@@ -1015,7 +1015,7 @@ with tab1:
             u.lang='ko-KR';u.rate=0.92;u.pitch=1.1;u.volume=1.0;
             synth.speak(u);
         }})();
-        </script>""", height=0)
+        </script>""", height=1)
 
         st.markdown("")
     else:
