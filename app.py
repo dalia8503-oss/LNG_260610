@@ -1224,8 +1224,8 @@ except Exception:
     _git_sha = "unknown"
 _deploy_time = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M KST")
 st.markdown(
-    f'<div style="text-align:center;color:#444;font-size:0.75rem;margin-top:48px;padding-bottom:16px;">'
+    f'<div style="text-align:center;color:#888;font-size:0.75rem;margin-top:48px;padding-bottom:16px;">'
     f'⚾ LNG선공사팀 발야구 대회 | 세기말 vs 새천년 ⚾'
-    f'<br><span style="color:#333;">build {_git_sha} · {_deploy_time}</span></div>',
+    f'<br><span style="color:#777;font-family:monospace;">build {_git_sha} · {_deploy_time}</span></div>',
     unsafe_allow_html=True,
 )
