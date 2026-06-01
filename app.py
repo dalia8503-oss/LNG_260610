@@ -795,7 +795,7 @@ if _bdata.get("broadcast"):
 
     var ov = doc2.createElement('div');
     ov.id = 'bov_' + bid;
-    ov.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;';
+    ov.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;';
     ov.style.background = '{_bc_bg}';
     ov.style.animation  = 'bshow_' + bid + ' 8s ease-in-out 1 forwards';
 
@@ -813,10 +813,17 @@ if _bdata.get("broadcast"):
     msg.style.textShadow = '0 0 4px #fff, 0 0 20px {_bc_color}, 0 0 60px {_bc_color}';
     msg.style.animation  = 'bpulse_' + bid + ' 1.6s ease-in-out infinite';
 
+    var hint = doc2.createElement('div');
+    hint.textContent = '화면을 터치하면 닫힙니다';
+    hint.style.cssText = 'position:absolute;bottom:40px;color:rgba(255,255,255,0.45);font-size:clamp(0.75rem,2.5vw,1rem);letter-spacing:1px;';
+    hint.style.fontFamily = "'Noto Sans KR', sans-serif";
+
     ov.appendChild(badge);
     ov.appendChild(msg);
+    ov.appendChild(hint);
     doc2.body.appendChild(ov);
 
+    ov.addEventListener('click', cleanup);
     ov.addEventListener('animationend', cleanup);
 
     // 효과음: 공지 → 띵동, 팀응원 → 팡파레
