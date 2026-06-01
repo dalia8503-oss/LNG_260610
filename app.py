@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import random
 import hashlib
 import base64
@@ -354,7 +353,7 @@ st.markdown("""
 if not st.session_state.user_name:
 
     # localStorage에 저장된 로그인 정보가 있으면 자동 복원
-    components.html("""<script>
+    st.iframe("""<script>
     (function(){
         var n=localStorage.getItem('lng_cheerup_name');
         var t=localStorage.getItem('lng_cheerup_team');
@@ -443,7 +442,7 @@ div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"]:last-of-type di
                 st.query_params["team"] = st.session_state.join_pick
                 _n64 = base64.b64encode(name_val.encode()).decode()
                 _t64 = base64.b64encode(st.session_state.join_pick.encode()).decode()
-                components.html(f"""<script>
+                st.iframe(f"""<script>
                 function b64d(s){{return decodeURIComponent(atob(s).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));}}
                 localStorage.setItem('lng_cheerup_name',b64d('{_n64}'));
                 localStorage.setItem('lng_cheerup_team',b64d('{_t64}'));
@@ -483,7 +482,7 @@ if st.session_state.user_team == "admin":
     _, col_adm_exit = st.columns([9, 1])
     with col_adm_exit:
         if st.button("퇴장", key="admin_exit"):
-            components.html("""<script>
+            st.iframe("""<script>
             localStorage.removeItem('lng_cheerup_name');
             localStorage.removeItem('lng_cheerup_team');
             </script>""", height=0)
@@ -724,7 +723,7 @@ st.markdown(f"""
 _, col_exit = st.columns([8, 1])
 with col_exit:
     if st.button("퇴장", key="exit_btn"):
-        components.html("""<script>
+        st.iframe("""<script>
         localStorage.removeItem('lng_cheerup_name');
         localStorage.removeItem('lng_cheerup_team');
         </script>""", height=0)
@@ -764,7 +763,7 @@ if _bdata.get("broadcast"):
                 st.rerun()
 
         # 효과음 (표시 1회만)
-        components.html(f"""<script>
+        st.iframe(f"""<script>
 (function(){{
     var k='bc_snd_{_bc_id}';
     var s=null;try{{s=sessionStorage}}catch(e){{}}
@@ -785,7 +784,7 @@ if _bdata.get("mission_flash"):
     _mf      = _bdata["mission_flash"]
     _mf_mid  = _mf.get("mid", "x")
     _mf_text = _mf.get("mission", "").replace("'", "\\'")
-    components.html(f"""
+    st.iframe(f"""
 <script>
 (function() {{
     var mid      = '{_mf_mid}';
@@ -998,7 +997,7 @@ with tab1:
         tts_text = f"{latest.get('name', '')}님의 응원. {latest.get('msg', '')}"
         msg_id   = hashlib.md5(tts_text.encode("utf-8")).hexdigest()
         msg_b64  = base64.b64encode(tts_text.encode("utf-8")).decode("ascii")
-        components.html(f"""
+        st.iframe(f"""
         <script>
         (function() {{
             var id='{msg_id}',b64='{msg_b64}',key='lastCheerSpoken';
