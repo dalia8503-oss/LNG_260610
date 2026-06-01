@@ -519,16 +519,41 @@ if st.session_state.user_team == "admin":
             st.info("현재 발동된 미션 없음")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("**💝 3행시 좋아요 랭킹**")
         _haiku_sorted = sorted(data.get("haiku", []), key=lambda x: x["likes"], reverse=True)
+        st.markdown(f"**💝 3행시 전체 목록 ({len(_haiku_sorted)}편) — 좋아요 순**")
         if _haiku_sorted:
             _medals = ["🥇", "🥈", "🥉"]
-            for _ri, _h in enumerate(_haiku_sorted[:10]):
+            for _ri, _h in enumerate(_haiku_sorted):
                 _medal = _medals[_ri] if _ri < 3 else f"{_ri+1}위"
                 _badge_cls = "cheer-badge-old" if _h["team"] == "세기말" else "cheer-badge-new"
-                _wc = "#ff8844" if _h["word"] == "세기말" else "#44ccff"
+                _wc = "#ff8844" if _h["word"] == "세기말" else ("#88ee55" if _h["word"] == "발야구" else "#44ccff")
                 _tc = "#ff4499" if _h["team"] == "세기말" else "#66ccff"
-                st.markdown(f'<div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:10px 16px;margin-bottom:6px;border-left:4px solid {_tc};display:flex;align-items:center;gap:12px;"><span style="font-size:1.3rem;min-width:36px;">{_medal}</span><span class="{_badge_cls}">{_h["team"]}</span><b style="color:#fff;margin-left:4px;">{_h["name"]}</b><span style="color:{_wc};font-size:0.85rem;margin-left:4px;">#{_h["word"]}</span><span style="margin-left:auto;color:#ff6699;font-size:1.1rem;font-weight:900;">❤️ {_h["likes"]}</span></div>', unsafe_allow_html=True)
+                _lines_html = "<br>".join(
+                    f'<b style="color:{_wc};">{ln[0]}</b>{ln[1:]}' for ln in _h["lines"]
+                )
+                _hcol_card, _hcol_del = st.columns([7, 1])
+                with _hcol_card:
+                    st.markdown(
+                        f'<div style="background:rgba(255,255,255,0.05);border-radius:14px;padding:14px 18px;'
+                        f'border-left:4px solid {_tc};margin-bottom:6px;">'
+                        f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+                        f'<span style="font-size:1.3rem;min-width:36px;">{_medal}</span>'
+                        f'<span class="{_badge_cls}">{_h["team"]} 팀</span>'
+                        f'<b style="color:#fff;">{_h["name"]}</b>'
+                        f'<span style="color:{_wc};font-size:0.82rem;font-weight:900;">#{_h["word"]}</span>'
+                        f'<span style="margin-left:auto;color:#ff6699;font-size:1rem;font-weight:900;">❤️ {_h["likes"]}</span>'
+                        f'</div>'
+                        f'<div style="line-height:2.1;font-size:1rem;color:#eee;padding-left:46px;">{_lines_html}</div>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+                with _hcol_del:
+                    st.markdown('<div style="height:22px;"></div>', unsafe_allow_html=True)
+                    if st.button("✕", key=f"adm_del_haiku_{_ri}", use_container_width=True, help="삭제"):
+                        _dd = load_data()
+                        _dd["haiku"] = [e for e in _dd["haiku"] if e["hid"] != _h["hid"]]
+                        save_data(_dd); st.rerun()
+            st.markdown("")
             if st.button("🗑️ 3행시 전체 초기화", key="adm_haiku_reset"):
                 d = load_data(); d["haiku"] = []; save_data(d); st.rerun()
         else:
