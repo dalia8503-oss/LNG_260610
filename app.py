@@ -737,104 +737,46 @@ st.markdown("<hr>", unsafe_allow_html=True)
 # ── 전광판 방송 배너 ──────────────────────────────────────────
 _bdata = load_data()
 if _bdata.get("broadcast"):
-    _bc        = _bdata["broadcast"]
-    _bc_team   = _bc.get("team", "")
-    _bc_msg    = _bc.get("msg",  "").replace('"', '&quot;').replace('<', '&lt;')
-    _bc_id     = _bc.get("bid",  "x")
-    _bc_color  = "#ff4499" if _bc_team == "세기말" else ("#ffdd00" if _bc_team == "공지" else "#66ccff")
-    _bc_bg     = "linear-gradient(135deg,#33001a,#660033)" if _bc_team == "세기말" else ("linear-gradient(135deg,#332200,#554400)" if _bc_team == "공지" else "linear-gradient(135deg,#001a33,#003366)")
-    _bc_label  = "📢 공지" if _bc_team == "공지" else f"{_bc_team} 팀 · {_bc.get('name','')}"
+    _bc       = _bdata["broadcast"]
+    _bc_id    = _bc.get("bid", "x")
 
-    # 배너를 iframe 내부에 렌더링 → 이벤트를 iframe 안에서만 처리 (cross-frame 없음)
-    components.html(f"""
-<style>
-*{{margin:0;padding:0;box-sizing:border-box}}
-html,body{{width:100%;height:100%;overflow:hidden;background:transparent}}
-#banner{{
-    width:100%;height:100%;
-    background:{_bc_bg};
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 20px;cursor:pointer;
-    font-family:'Noto Sans KR',sans-serif;
-    animation:slidein .35s ease-out;
-}}
-@keyframes slidein{{from{{transform:translateY(-100%);opacity:0}}to{{transform:translateY(0);opacity:1}}}}
-.txt{{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}}
-.lbl{{color:{_bc_color};font-size:clamp(.7rem,2.5vw,.85rem);font-weight:700;letter-spacing:2px;white-space:nowrap}}
-.msg{{color:#fff;font-size:clamp(.95rem,3.5vw,1.3rem);font-weight:700;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-.x{{color:rgba(255,255,255,.7);font-size:2rem;font-weight:300;padding:0 4px 0 16px;flex-shrink:0;line-height:1}}
-</style>
-<div id="banner">
-  <div class="txt">
-    <span class="lbl">{_bc_label}</span>
-    <span class="msg">{_bc_msg}</span>
-  </div>
-  <span class="x">×</span>
+    if not st.session_state.get(f"bc_off_{_bc_id}"):
+        _bc_team  = _bc.get("team", "")
+        _bc_msg   = _bc.get("msg", "").replace("<", "&lt;").replace('"', "&quot;")
+        _bc_color = "#ff4499" if _bc_team == "세기말" else ("#ffdd00" if _bc_team == "공지" else "#66ccff")
+        _bc_bg    = "linear-gradient(135deg,#33001a,#660033)" if _bc_team == "세기말" else ("linear-gradient(135deg,#332200,#554400)" if _bc_team == "공지" else "linear-gradient(135deg,#001a33,#003366)")
+        _bc_label = "📢 공지" if _bc_team == "공지" else f"{_bc_team} 팀 · {_bc.get('name','')}"
+
+        _bc_col1, _bc_col2 = st.columns([10, 1])
+        with _bc_col1:
+            st.markdown(f"""
+<div style="background:{_bc_bg};padding:10px 16px;border-radius:8px;animation:bc_in .3s ease-out;margin-bottom:0;">
+  <div style="color:{_bc_color};font-size:.72rem;font-weight:700;letter-spacing:2px;">{_bc_label}</div>
+  <div style="color:#fff;font-size:1.05rem;font-weight:700;margin-top:2px;">{_bc_msg}</div>
 </div>
-<script>
+<style>@keyframes bc_in{{from{{opacity:0;transform:translateY(-10px)}}to{{opacity:1;transform:translateY(0)}}}}</style>
+""", unsafe_allow_html=True)
+        with _bc_col2:
+            if st.button("✕", key=f"bc_close_{_bc_id}", use_container_width=True, help="닫기"):
+                st.session_state[f"bc_off_{_bc_id}"] = True
+                st.rerun()
+
+        # 효과음 (표시 1회만)
+        components.html(f"""<script>
 (function(){{
-    var bid='{_bc_id}', keyDone='bc_done_'+bid;
-    var s=null; try{{s=sessionStorage}}catch(e){{}}
-
-    // iframe pointer-events 활성화 (window.frameElement)
-    var fr=null;
-    try{{fr=window.frameElement}}catch(e){{}}
-    if(fr){{
-        fr.style.setProperty('position','fixed','important');
-        fr.style.setProperty('top','0','important');
-        fr.style.setProperty('left','0','important');
-        fr.style.setProperty('width','100vw','important');
-        fr.style.setProperty('height','70px','important');
-        fr.style.setProperty('z-index','99999','important');
-        fr.style.setProperty('border','none','important');
-        fr.style.setProperty('pointer-events','auto','important');
-    }}
-
-    // 이미 닫힌 경우 즉시 숨김
-    if(s&&s.getItem(keyDone)){{
-        document.documentElement.style.display='none';
-        if(fr){{fr.style.setProperty('display','none','important');fr.style.setProperty('height','0','important');}}
-        return;
-    }}
-
-    var dismissed=false;
-    var dismiss=function(e){{
-        if(e){{try{{e.preventDefault();e.stopPropagation();}}catch(_){{}}}}
-        if(dismissed)return; dismissed=true;
-        if(s)s.setItem(keyDone,'1');
-        document.documentElement.style.opacity='0';
-        document.documentElement.style.transition='opacity .2s';
-        setTimeout(function(){{
-            document.documentElement.style.display='none';
-            if(fr){{
-                fr.style.setProperty('display','none','important');
-                fr.style.setProperty('height','0','important');
-            }}
-        }},200);
-    }};
-
-    // document 레벨 캡처 이벤트 — 어디를 탭해도 잡힘
-    document.addEventListener('click',    dismiss, true);
-    document.addEventListener('touchend', dismiss, {{capture:true, passive:false}});
-    document.addEventListener('pointerup',dismiss, true);
-    setTimeout(dismiss, 3000);  // 3초 자동 닫기
-
-    // 효과음
+    var k='bc_snd_{_bc_id}';
+    var s=null;try{{s=sessionStorage}}catch(e){{}}
+    if(s&&s.getItem(k))return;
+    if(s)s.setItem(k,'1');
     try{{
-        var AC=window.AudioContext||window.webkitAudioContext;
-        if(!AC)throw 0;
-        var ax=new AC();
-        var bt='{_bc_team}';
+        var AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw 0;
+        var ax=new AC(),bt='{_bc_team}';
         var bell=function(f,t,d,v){{var o=ax.createOscillator(),g=ax.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(ax.destination);o.start(t);o.stop(t+d+.05);}};
-        var play=function(){{
-            if(bt==='공지'){{bell(880,ax.currentTime,1.2,.4);bell(587,ax.currentTime+.45,1,.35);}}
-            else{{[[523.25,0,.2],[659.25,.22,.2],[784,.44,.2],[1046.5,.66,1]].forEach(function(n){{var o=ax.createOscillator(),g=ax.createGain(),t=ax.currentTime+n[1];o.type='triangle';o.frequency.value=n[0];g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.35,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+n[2]);o.connect(g);g.connect(ax.destination);o.start(t);o.stop(t+n[2]+.05);}});}}
-        }};
+        var play=function(){{if(bt==='공지'){{bell(880,ax.currentTime,1.2,.4);bell(587,ax.currentTime+.45,1,.35);}}else{{[[523.25,0,.2],[659.25,.22,.2],[784,.44,.2],[1046.5,.66,1]].forEach(function(n){{var o=ax.createOscillator(),g=ax.createGain(),t=ax.currentTime+n[1];o.type='triangle';o.frequency.value=n[0];g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.35,t+.03);g.gain.exponentialRampToValueAtTime(.001,t+n[2]);o.connect(g);g.connect(ax.destination);o.start(t);o.stop(t+n[2]+.05);}});}}}};
         if(ax.state==='suspended')ax.resume().then(play);else play();
     }}catch(e){{}}
 }})();
-</script>
-""", height=70)
+</script>""", height=0)
 
 # ── 깜짝 미션 전체화면 오버레이 ──────────────────────────────
 if _bdata.get("mission_flash"):
